@@ -1,4 +1,12 @@
 const MAX_TITLE_LENGTH = 160;
+const BLOCKED_ELEMENTS = new Set([
+  "animate", "applet", "audio", "base", "button", "embed", "foreignobject", "form", "iframe", "input",
+  "link", "math", "meta", "object", "script", "select", "set", "style", "svg", "textarea", "video",
+]);
+
+export function elementIsAllowed(tagName) {
+  return !BLOCKED_ELEMENTS.has(String(tagName || "").toLowerCase());
+}
 
 function cleanTitle(value) {
   const title = String(value || "").trim().replace(/\s+/g, " ");
@@ -49,7 +57,7 @@ function safeProtocol(value, { image = false } = {}) {
 
 export function attributeIsSafe(name, value) {
   const attribute = String(name || "").toLowerCase();
-  if (attribute.startsWith("on") || attribute === "style" || attribute === "srcdoc" || attribute === "formaction") return false;
+  if (attribute.startsWith("on") || ["style", "srcdoc", "formaction", "attributename", "to", "values", "begin", "end"].includes(attribute)) return false;
   if (attribute === "data-mw" || attribute === "data-parsoid") return false;
   if (attribute === "href" || attribute === "xlink:href") return safeProtocol(value);
   if (attribute === "src" || attribute === "poster") return safeProtocol(value, { image: true });

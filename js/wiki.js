@@ -1,6 +1,7 @@
 import {
   articleHref,
   attributeIsSafe,
+  elementIsAllowed,
   normalizeHistory,
   normalizeRoute,
   normalizeSearchResults,
@@ -78,8 +79,11 @@ function finish() {
 function sanitizeFragment(html, { diff = false } = {}) {
   const source = diff ? `<table><tbody>${html}</tbody></table>` : `<div>${html}</div>`;
   const parsed = new DOMParser().parseFromString(source, "text/html");
-  parsed.querySelectorAll("script,style,iframe,object,embed,form,input,button,textarea,select,link,meta,base").forEach((node) => node.remove());
   parsed.querySelectorAll("*").forEach((node) => {
+    if (!elementIsAllowed(node.localName) || node.namespaceURI !== "http://www.w3.org/1999/xhtml") {
+      node.remove();
+      return;
+    }
     for (const attribute of [...node.attributes]) {
       if (!attributeIsSafe(attribute.name, attribute.value)) node.removeAttribute(attribute.name);
     }

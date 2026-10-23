@@ -105,6 +105,15 @@ test("validation errors are bounded and never call MediaWiki", async () => {
   });
 });
 
+test("repeated numeric parameters are rejected before MediaWiki", async () => {
+  await withApp(async ({ baseUrl, service }) => {
+    const response = await fetch(`${baseUrl}/api/wiki/diff?from=1&from=2&to=3`);
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).error.code, "invalid_query");
+    assert.equal(service.calls.length, 0);
+  });
+});
+
 test("anonymous writes are rejected before MediaWiki is called", async () => {
   await withApp(async ({ baseUrl, service }) => {
     const response = await fetch(`${baseUrl}/api/wiki/article`, {
@@ -137,6 +146,38 @@ test("authenticated writes pass the server-held access token and validated body"
     assert.equal(call.args[1], "server-private");
     assert.equal(call.args[0].title, "Guía");
   });
+});
+
+test("malformed and duplicate article fields are rejected before session refresh or save", async () => {
+  let refreshCalls = 0;
+  const oauth = {
+    async refresh() { refreshCalls += 1; return {}; },
+  };
+  await withApp(async ({ baseUrl, service, sessionCodec }) => {
+    const cookie = sessionCodec.seal({ accessToken: "expired", refreshToken: "refresh", expiresAt: Date.now() - 1 });
+    for (const body of [
+      JSON.stringify({ title: 123, text: { unexpected: true }, summary: false, baseRevisionId: true }),
+      '{"title":"Guía","title":"Otra","text":"Texto"}',
+    ]) {
+      const response = await fetch(`${baseUrl}/api/wiki/article`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://www.churroslinux.org", cookie: `churros_wiki_session=${cookie}` },
+        body,
+      });
+      assert.equal(response.status, 400);
+    }
+    assert.equal(refreshCalls, 0);
+    assert.equal(service.calls.length, 0);
+  }, { oauth });
+});
+
+test("trusted loopback proxy addresses have independent rate-limit buckets", async () => {
+  await withApp(async ({ baseUrl }) => {
+    const first = await fetch(`${baseUrl}/api/wiki/health`, { headers: { "x-real-ip": "198.51.100.10" } });
+    const second = await fetch(`${baseUrl}/api/wiki/health`, { headers: { "x-real-ip": "198.51.100.11" } });
+    assert.equal(first.status, 200);
+    assert.equal(second.status, 200);
+  }, { config: { rateLimit: { read: 1, write: 1, windowMs: 60_000 } } });
 });
 
 test("insufficient MediaWiki rights remain a 403 response", async () => {

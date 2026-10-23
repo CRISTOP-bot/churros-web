@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   articleHref,
   attributeIsSafe,
+  elementIsAllowed,
   normalizeHistory,
   normalizeRoute,
   normalizeSearchResults,
@@ -48,6 +49,15 @@ test("attribute policy removes active content and permits safe article markup", 
   assert.equal(attributeIsSafe("href", "/wiki/Guía"), true);
   assert.equal(attributeIsSafe("class", "mw-parser-output"), true);
   assert.equal(attributeIsSafe("data-mw", "private parser data"), false);
+});
+
+test("element policy rejects SVG, MathML, and active embedded content", () => {
+  for (const tag of ["svg", "math", "set", "animate", "foreignObject", "script", "iframe"]) {
+    assert.equal(elementIsAllowed(tag), false, tag);
+  }
+  for (const tag of ["p", "table", "a", "img", "code"]) {
+    assert.equal(elementIsAllowed(tag), true, tag);
+  }
 });
 
 test("search and history view models tolerate missing optional fields", () => {

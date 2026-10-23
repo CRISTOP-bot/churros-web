@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { isIP } from "node:net";
 
 import { publicConfig } from "./config.js";
 import { HttpError, RateLimiter, assertSameOrigin, readJson } from "./security.js";
@@ -40,7 +41,9 @@ function queryString(url, name, { required = true, min = 1, max = 160, code = "i
 }
 
 function queryInteger(url, name, { fallback, min = 1, max = 50, required = false } = {}) {
-  const raw = url.searchParams.get(name);
+  const values = url.searchParams.getAll(name);
+  if (values.length > 1) throw new HttpError(400, "invalid_query", `El parámetro ${name} no es válido.`);
+  const raw = values[0] ?? null;
   if (raw === null && !required) return fallback;
   if (!/^\d+$/.test(raw || "")) throw new HttpError(400, "invalid_query", `El parámetro ${name} no es válido.`);
   const value = Number(raw);
@@ -49,9 +52,14 @@ function queryInteger(url, name, { fallback, min = 1, max = 50, required = false
 }
 
 function validatedArticle(body) {
-  const title = String(body.title ?? "").trim().replace(/\s+/g, " ");
-  const text = String(body.text ?? "");
-  const summary = String(body.summary ?? "").trim();
+  if (typeof body.title !== "string" || typeof body.text !== "string"
+    || (body.summary !== undefined && typeof body.summary !== "string")
+    || (body.baseRevisionId !== undefined && body.baseRevisionId !== null && typeof body.baseRevisionId !== "number")) {
+    throw new HttpError(400, "invalid_article", "Los campos del artículo no son válidos.");
+  }
+  const title = body.title.trim().replace(/\s+/g, " ");
+  const text = body.text;
+  const summary = (body.summary || "").trim();
   if (!title || title.length > 160 || /[\[\]{}<>|]/.test(title)) {
     throw new HttpError(400, "invalid_title", "El título no es válido.");
   }
@@ -60,10 +68,17 @@ function validatedArticle(body) {
   const baseRevisionId = body.baseRevisionId === undefined || body.baseRevisionId === null
     ? null
     : Number(body.baseRevisionId);
-  if (baseRevisionId !== null && (!Number.isInteger(baseRevisionId) || baseRevisionId < 1)) {
+  if (baseRevisionId !== null && (!Number.isSafeInteger(baseRevisionId) || baseRevisionId < 1)) {
     throw new HttpError(400, "invalid_revision", "La revisión base no es válida.");
   }
   return { title, text, summary, baseRevisionId };
+}
+
+function clientAddress(request) {
+  const remote = request.socket?.remoteAddress || "unknown";
+  const loopback = remote === "127.0.0.1" || remote === "::1" || remote === "::ffff:127.0.0.1";
+  const forwarded = String(request.headers["x-real-ip"] || "").trim();
+  return loopback && isIP(forwarded) ? forwarded : remote;
 }
 
 function errorStatus(error) {
@@ -119,7 +134,7 @@ export function createApp({ config, service, oauth, sessionCodec, logger = conso
   return async function app(request, response) {
     const requestId = randomUUID();
     const url = new URL(request.url, config.publicOrigin);
-    const clientKey = request.socket?.remoteAddress || "unknown";
+    const clientKey = clientAddress(request);
     const limiter = request.method === "POST" ? writeLimiter : readLimiter;
     const limit = limiter.consume(clientKey);
     if (!limit.allowed) {
@@ -229,10 +244,10 @@ export function createApp({ config, service, oauth, sessionCodec, logger = conso
       }
       if (request.method === "POST" && url.pathname === "/api/wiki/article") {
         assertSameOrigin(request, config.publicOrigin);
+        const body = validatedArticle(await readJson(request, { maxBytes: 210_000 }));
         const loaded = await accessSession(request);
         const { session } = loaded;
         if (!session?.accessToken) throw new HttpError(401, "authentication_required", "Inicia sesión con MediaWiki para editar.");
-        const body = validatedArticle(await readJson(request, { maxBytes: 210_000 }));
         sendJson(response, 200, await service.saveArticle(body, session.accessToken), {
           requestId,
           headers: loaded.cookie ? { "set-cookie": loaded.cookie } : {},

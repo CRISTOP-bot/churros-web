@@ -170,6 +170,10 @@ export class WikiService {
     }
 
     const current = await this.getSource(input.title, accessToken);
+    const expectsCreation = input.baseRevisionId === null || input.baseRevisionId === undefined;
+    if ((expectsCreation && !current.missing) || (!expectsCreation && current.missing)) {
+      throw new WikiServiceError("edit_conflict", "El artículo cambió mientras lo editabas. Recarga antes de guardar.", { status: 409 });
+    }
     if (current.missing && !permissions.canCreate) {
       throw new WikiServiceError("forbidden_create", "Tu cuenta de MediaWiki no puede crear artículos.", { status: 403 });
     }
@@ -191,8 +195,8 @@ export class WikiService {
         summary: String(input.summary ?? ""),
         token: csrfToken,
         assert: "user",
-        baserevid: current.missing ? undefined : Number(input.baseRevisionId || current.revisionId),
-        createonly: current.missing || undefined,
+        baserevid: expectsCreation ? undefined : Number(input.baseRevisionId),
+        createonly: expectsCreation || undefined,
       }, { method: "POST", accessToken });
       if (payload?.edit?.result !== "Success") {
         throw new WikiServiceError("edit_failed", "MediaWiki no confirmó la edición.", { status: 502 });

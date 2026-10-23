@@ -42,12 +42,65 @@ export async function readJson(request, { maxBytes = 262_144 } = {}) {
   }
   if (Buffer.byteLength(text) > maxBytes) throw new HttpError(413, "body_too_large", "La solicitud es demasiado grande.");
   try {
+    if (hasDuplicateObjectKeys(text)) throw new Error("duplicate object key");
     const value = JSON.parse(text);
     if (!value || Array.isArray(value) || typeof value !== "object") throw new Error("object required");
     return value;
   } catch {
     throw new HttpError(400, "invalid_json", "El cuerpo JSON no es válido.");
   }
+}
+
+function hasDuplicateObjectKeys(text) {
+  let index = 0;
+  const whitespace = () => { while (/\s/.test(text[index] || "")) index += 1; };
+  const string = () => {
+    const start = index;
+    index += 1;
+    while (index < text.length) {
+      if (text[index] === "\\") index += 2;
+      else if (text[index++] === '"') break;
+    }
+    return JSON.parse(text.slice(start, index));
+  };
+  const value = () => {
+    whitespace();
+    if (text[index] === '"') { string(); return false; }
+    if (text[index] === "{") return object();
+    if (text[index] === "[") return array();
+    while (index < text.length && !/[\s,}\]]/.test(text[index])) index += 1;
+    return false;
+  };
+  const array = () => {
+    index += 1;
+    whitespace();
+    if (text[index] === "]") { index += 1; return false; }
+    while (index < text.length) {
+      if (value()) return true;
+      whitespace();
+      if (text[index++] === "]") return false;
+    }
+    return false;
+  };
+  const object = () => {
+    index += 1;
+    const keys = new Set();
+    whitespace();
+    if (text[index] === "}") { index += 1; return false; }
+    while (index < text.length) {
+      whitespace();
+      const key = string();
+      if (keys.has(key)) return true;
+      keys.add(key);
+      whitespace();
+      index += 1;
+      if (value()) return true;
+      whitespace();
+      if (text[index++] === "}") return false;
+    }
+    return false;
+  };
+  return value();
 }
 
 export class RateLimiter {

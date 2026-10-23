@@ -14,7 +14,7 @@ const service = new WikiService({
   mainPage: config.wiki.mainPage,
   featuredCategory: config.wiki.featuredCategory,
 });
-const oauth = config.oauth.enabled ? new OAuthClient(config.oauth) : null;
+const oauth = config.oauth.enabled ? new OAuthClient({ ...config.oauth, timeoutMs: config.wiki.timeoutMs }) : null;
 const sessionCodec = new SessionCodec(config.session);
 const server = createServer(createApp({ config, service, oauth, sessionCodec }));
 

@@ -81,6 +81,55 @@ test("timeouts are distinguished from other network failures", async () => {
   );
 });
 
+test("timeout covers delayed response bodies", async () => {
+  const client = new MediaWikiClient({
+    apiUrl: "https://wiki.example/w/api.php",
+    timeoutMs: 5,
+    fetchImpl: async (_url, { signal }) => new Response(new ReadableStream({
+      start(controller) {
+        const timer = setTimeout(() => {
+          controller.enqueue(new TextEncoder().encode('{"query":{"ok":true}}'));
+          controller.close();
+        }, 30);
+        signal.addEventListener("abort", () => {
+          clearTimeout(timer);
+          controller.error(signal.reason);
+        }, { once: true });
+      },
+    }), { headers: { "content-type": "application/json" } }),
+  });
+
+  await assert.rejects(
+    client.request({ action: "query" }),
+    (error) => error instanceof MediaWikiError && error.code === "upstream_timeout",
+  );
+});
+
+test("modern MediaWiki API errors are normalized", async () => {
+  const client = new MediaWikiClient({
+    apiUrl: "https://wiki.example/w/api.php",
+    fetchImpl: async () => jsonResponse({ errors: [{ code: "editconflict", text: "Conflict" }] }),
+  });
+
+  await assert.rejects(
+    client.request({ action: "edit" }),
+    (error) => error instanceof MediaWikiError && error.code === "editconflict" && error.message === "Conflict",
+  );
+});
+
+test("oversized MediaWiki responses are rejected", async () => {
+  const client = new MediaWikiClient({
+    apiUrl: "https://wiki.example/w/api.php",
+    maxResponseBytes: 16,
+    fetchImpl: async () => jsonResponse({ query: { value: "x".repeat(100) } }),
+  });
+
+  await assert.rejects(
+    client.request({ action: "query" }),
+    (error) => error instanceof MediaWikiError && error.code === "upstream_response_too_large",
+  );
+});
+
 test("MediaWiki API errors preserve only safe error metadata", async () => {
   const client = new MediaWikiClient({
     apiUrl: "https://wiki.example/w/api.php",

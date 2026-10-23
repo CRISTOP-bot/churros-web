@@ -92,3 +92,29 @@ test("refresh exchanges only the server-held refresh token", async () => {
   assert.equal(body.get("refresh_token"), "refresh-private");
   assert.equal(tokens.accessToken, "new");
 });
+
+test("OAuth requests time out while consuming a response body", async () => {
+  const oauth = new OAuthClient({
+    baseUrl: "https://wiki.example/oauth2",
+    clientId: "id",
+    redirectUri: "https://site.example/callback",
+    timeoutMs: 5,
+    fetchImpl: async (_url, { signal }) => new Response(new ReadableStream({
+      start(controller) {
+        const timer = setTimeout(() => {
+          controller.enqueue(new TextEncoder().encode('{"access_token":"late"}'));
+          controller.close();
+        }, 30);
+        signal.addEventListener("abort", () => {
+          clearTimeout(timer);
+          controller.error(signal.reason);
+        }, { once: true });
+      },
+    }), { headers: { "content-type": "application/json" } }),
+  });
+
+  await assert.rejects(
+    oauth.refresh("refresh"),
+    (error) => error instanceof OAuthError && error.code === "oauth_timeout" && error.status === 504,
+  );
+});

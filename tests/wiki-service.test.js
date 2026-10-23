@@ -164,3 +164,17 @@ test("saveArticle maps edit conflicts to a stable conflict error", async () => {
     (error) => error instanceof WikiServiceError && error.code === "edit_conflict",
   );
 });
+
+test("saveArticle preserves create intent when another editor created the page", async () => {
+  const client = queuedClient([
+    { query: { userinfo: { id: 7, name: "Lina", rights: ["edit", "createpage"] } } },
+    { query: { pages: [{ pageid: 4, title: "Nueva", revisions: [{ revid: 20 }] }] } },
+  ]);
+  const service = new WikiService({ client });
+
+  await assert.rejects(
+    service.saveArticle({ title: "Nueva", text: "Texto", baseRevisionId: null }, "token"),
+    (error) => error instanceof WikiServiceError && error.code === "edit_conflict" && error.status === 409,
+  );
+  assert.equal(client.calls.length, 2);
+});

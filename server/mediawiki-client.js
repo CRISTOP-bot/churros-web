@@ -19,12 +19,13 @@ function appendParams(target, params) {
 }
 
 export class MediaWikiClient {
-  constructor({ apiUrl, fetchImpl = globalThis.fetch, timeoutMs = 8_000, userAgent = "ChurrOS-Wiki/1.0" }) {
+  constructor({ apiUrl, fetchImpl = globalThis.fetch, timeoutMs = 8_000, maxResponseBytes = 2_000_000, userAgent = "ChurrOS-Wiki/1.0" }) {
     if (!apiUrl) throw new TypeError("apiUrl is required");
     if (typeof fetchImpl !== "function") throw new TypeError("fetchImpl must be a function");
     this.apiUrl = apiUrl;
     this.fetchImpl = fetchImpl;
     this.timeoutMs = timeoutMs;
+    this.maxResponseBytes = maxResponseBytes;
     this.userAgent = userAgent;
   }
 
@@ -53,43 +54,69 @@ export class MediaWikiClient {
       ? AbortSignal.any([signal, timeoutController.signal])
       : timeoutController.signal;
 
-    let response;
     try {
-      response = await this.fetchImpl(url.toString(), options);
-    } catch (error) {
-      if (timeoutController.signal.aborted) {
-        throw new MediaWikiError("upstream_timeout", "MediaWiki tardó demasiado en responder.", { status: 504, cause: error });
+      let response;
+      try {
+        response = await this.fetchImpl(url.toString(), options);
+      } catch (error) {
+        if (timeoutController.signal.aborted) {
+          throw new MediaWikiError("upstream_timeout", "MediaWiki tardó demasiado en responder.", { status: 504, cause: error });
+        }
+        throw new MediaWikiError("upstream_unavailable", "No fue posible conectar con MediaWiki.", { status: 502, cause: error });
       }
-      throw new MediaWikiError("upstream_unavailable", "No fue posible conectar con MediaWiki.", { status: 502, cause: error });
+
+      let payload;
+      try {
+        const declaredSize = Number(response.headers.get("content-length") || 0);
+        if (declaredSize > this.maxResponseBytes) {
+          throw new MediaWikiError("upstream_response_too_large", "MediaWiki devolvió una respuesta demasiado grande.", { status: 502 });
+        }
+        const reader = response.body?.getReader();
+        const chunks = [];
+        let size = 0;
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            size += value.byteLength;
+            if (size > this.maxResponseBytes) {
+              await reader.cancel();
+              throw new MediaWikiError("upstream_response_too_large", "MediaWiki devolvió una respuesta demasiado grande.", { status: 502 });
+            }
+            chunks.push(value);
+          }
+          payload = JSON.parse(new TextDecoder().decode(Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)))));
+        } else {
+          payload = await response.json();
+        }
+      } catch (error) {
+        if (error instanceof MediaWikiError) throw error;
+        if (timeoutController.signal.aborted) {
+          throw new MediaWikiError("upstream_timeout", "MediaWiki tardó demasiado en responder.", { status: 504, cause: error });
+        }
+        throw new MediaWikiError("invalid_upstream_response", "MediaWiki devolvió una respuesta no válida.", { status: 502, cause: error });
+      }
+
+      if (!response.ok) {
+        throw new MediaWikiError("upstream_http_error", "MediaWiki rechazó la solicitud.", {
+          status: response.status === 429 ? 503 : 502,
+          details: { upstreamStatus: response.status },
+        });
+      }
+
+      const apiError = payload?.errors?.[0] || payload?.error;
+      if (apiError) {
+        const code = String(apiError.code || "upstream_api_error");
+        throw new MediaWikiError(
+          code,
+          String(apiError.text || apiError.info || "MediaWiki no pudo completar la solicitud."),
+          { status: 502, details: { upstreamCode: code } },
+        );
+      }
+
+      return payload;
     } finally {
       clearTimeout(timer);
     }
-
-    let payload;
-    try {
-      payload = await response.json();
-    } catch (error) {
-      throw new MediaWikiError("invalid_upstream_response", "MediaWiki devolvió una respuesta no válida.", {
-        status: 502,
-        cause: error,
-      });
-    }
-
-    if (!response.ok) {
-      throw new MediaWikiError("upstream_http_error", "MediaWiki rechazó la solicitud.", {
-        status: response.status === 429 ? 503 : 502,
-        details: { upstreamStatus: response.status },
-      });
-    }
-
-    if (payload?.error) {
-      throw new MediaWikiError(
-        String(payload.error.code || "upstream_api_error"),
-        String(payload.error.info || "MediaWiki no pudo completar la solicitud."),
-        { status: 502, details: { upstreamCode: String(payload.error.code || "unknown") } },
-      );
-    }
-
-    return payload;
   }
 }

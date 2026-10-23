@@ -22,7 +22,7 @@ function safeEqual(left, right) {
 }
 
 export class OAuthClient {
-  constructor({ baseUrl, clientId, clientSecret = "", redirectUri, scope = "basic editpage", fetchImpl = globalThis.fetch, now = Date.now }) {
+  constructor({ baseUrl, clientId, clientSecret = "", redirectUri, scope = "basic editpage", fetchImpl = globalThis.fetch, now = Date.now, timeoutMs = 8_000, maxResponseBytes = 256_000 }) {
     this.baseUrl = String(baseUrl).replace(/\/$/, "");
     this.clientId = clientId;
     this.clientSecret = clientSecret;
@@ -30,6 +30,8 @@ export class OAuthClient {
     this.scope = scope;
     this.fetchImpl = fetchImpl;
     this.now = now;
+    this.timeoutMs = timeoutMs;
+    this.maxResponseBytes = maxResponseBytes;
   }
 
   createAuthorization() {
@@ -58,10 +60,9 @@ export class OAuthClient {
       code_verifier: verifier,
       redirect_uri: this.redirectUri,
     });
-    const profileResponse = await this.fetchImpl(`${this.baseUrl}/resource/profile`, {
+    const profile = await this.#requestJson(`${this.baseUrl}/resource/profile`, {
       headers: { accept: "application/json", authorization: `Bearer ${tokens.accessToken}` },
-    });
-    const profile = await this.#readResponse(profileResponse, "oauth_profile_failed");
+    }, "oauth_profile_failed");
     return {
       ...tokens,
       user: {
@@ -78,12 +79,11 @@ export class OAuthClient {
   async #tokenRequest(values) {
     const body = new URLSearchParams({ ...values, client_id: this.clientId });
     if (this.clientSecret) body.set("client_secret", this.clientSecret);
-    const response = await this.fetchImpl(`${this.baseUrl}/access_token`, {
+    const payload = await this.#requestJson(`${this.baseUrl}/access_token`, {
       method: "POST",
       headers: { accept: "application/json", "content-type": "application/x-www-form-urlencoded;charset=UTF-8" },
       body: body.toString(),
-    });
-    const payload = await this.#readResponse(response, "oauth_token_failed");
+    }, "oauth_token_failed");
     if (!payload.access_token) throw new OAuthError("oauth_token_invalid", "MediaWiki no entregó un token de acceso.", { status: 502 });
     return {
       accessToken: String(payload.access_token),
@@ -94,16 +94,41 @@ export class OAuthClient {
     };
   }
 
-  async #readResponse(response, code) {
-    let payload;
+  async #requestJson(url, options, code) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(new DOMException("OAuth request timed out", "TimeoutError")), this.timeoutMs);
     try {
-      payload = await response.json();
+      const response = await this.fetchImpl(url, { ...options, signal: controller.signal });
+      const declaredSize = Number(response.headers.get("content-length") || 0);
+      if (declaredSize > this.maxResponseBytes) throw new OAuthError(code, "MediaWiki devolvió una respuesta OAuth demasiado grande.", { status: 502 });
+      const reader = response.body?.getReader();
+      const chunks = [];
+      let size = 0;
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          size += value.byteLength;
+          if (size > this.maxResponseBytes) {
+            await reader.cancel();
+            throw new OAuthError(code, "MediaWiki devolvió una respuesta OAuth demasiado grande.", { status: 502 });
+          }
+          chunks.push(Buffer.from(value));
+        }
+      }
+      const payload = reader ? JSON.parse(Buffer.concat(chunks).toString("utf8")) : await response.json();
+      if (!response.ok || payload.error) {
+        throw new OAuthError(code, String(payload.error_description || payload.error || "MediaWiki rechazó la autorización."), { status: 502 });
+      }
+      return payload;
     } catch (error) {
+      if (error instanceof OAuthError) throw error;
+      if (controller.signal.aborted) {
+        throw new OAuthError("oauth_timeout", "MediaWiki tardó demasiado en responder.", { status: 504, cause: error });
+      }
       throw new OAuthError(code, "MediaWiki devolvió una respuesta OAuth no válida.", { status: 502, cause: error });
+    } finally {
+      clearTimeout(timer);
     }
-    if (!response.ok || payload.error) {
-      throw new OAuthError(code, String(payload.error_description || payload.error || "MediaWiki rechazó la autorización."), { status: 502 });
-    }
-    return payload;
   }
 }
