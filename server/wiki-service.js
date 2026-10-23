@@ -33,7 +33,7 @@ export class WikiService {
       const payload = await this.client.request({
         action: "parse",
         page: normalizedTitle,
-        prop: "text|categories|links",
+        prop: "text|categories|links|revid",
         redirects: true,
         disableeditsection: true,
       });
@@ -70,6 +70,7 @@ export class WikiService {
       list: "search",
       srsearch: String(query ?? "").trim(),
       srnamespace: 0,
+      srwhat: "text",
       srprop: "snippet|timestamp",
       srlimit: clamp(limit, 1, 20),
     });

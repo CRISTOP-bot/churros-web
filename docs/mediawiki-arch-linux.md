@@ -149,7 +149,7 @@ No abras los puertos 3000, 8081 o 3306 en el firewall. El único punto público 
 
 El repositorio incluye `wiki-content/` con las páginas base de la wiki en wikitext: portada, primeros pasos, descarga, instalación, ediciones, edición Server, aplicaciones, requisitos, actualizaciones, red, escritorios, rollback, solución de problemas, preguntas frecuentes, comunidad, contribución e historial de versiones. Las categorías iniciales son `Destacados`, `Guías`, `Referencia` y `Comunidad`.
 
-Copia el sitio en `/srv/http/churros-web` y ejecuta el importador como root. El script usa `maintenance/run.php importTextFiles`, conserva el historial, crea entradas en cambios recientes y no vuelve a escribir páginas cuyo contenido no cambió:
+Copia el sitio en `/srv/http/churros-web` y ejecuta el importador como root. El script usa `maintenance/run.php importTextFiles`, conserva el historial, crea entradas en cambios recientes, no vuelve a escribir páginas cuyo contenido no cambió y reconstruye el índice de búsqueda para que el contenido sea localizable desde el primer momento:
 
 ```bash
 cd /srv/http/churros-web
@@ -164,6 +164,7 @@ El script valida que exista MediaWiki y ejecuta la importación como el usuario 
 | `WIKI_CONTENT_DIR` | `wiki-content/` del repositorio | Directorio con los `.wiki` |
 | `WIKI_RUN_USER` | `http` | Usuario que ejecuta el mantenimiento |
 | `WIKI_IMPORT_SUMMARY` | `Contenido inicial de la wiki de ChurrOS` | Resumen de las revisiones |
+| `WIKI_REBUILD_SEARCH` | `1` | Reconstruye el índice de búsqueda; usa `0` para omitirlo |
 
 No se necesitan credenciales de OAuth ni de bot: el script se ejecuta en el servidor y escribe directamente en la base de datos de MediaWiki. No lo ejecutes desde el navegador ni lo expongas por HTTP.
 

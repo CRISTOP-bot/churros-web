@@ -38,7 +38,7 @@ test("getArticle normalizes parsed HTML, categories, and related main-namespace 
     related: ["Primeros pasos"],
   });
   assert.equal(client.calls[0].params.page, "Instalación");
-  assert.equal(client.calls[0].params.prop, "text|categories|links");
+  assert.equal(client.calls[0].params.prop, "text|categories|links|revid");
 });
 
 test("getArticle maps a missing page to not_found", async () => {
@@ -58,6 +58,7 @@ test("search returns bounded result summaries", async () => {
   const results = await service.search("linux", 200);
 
   assert.equal(client.calls[0].params.srlimit, 20);
+  assert.equal(client.calls[0].params.srwhat, "text");
   assert.deepEqual(results[0], {
     title: "ChurrOS",
     pageId: 1,

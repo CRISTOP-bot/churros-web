@@ -6,6 +6,7 @@ CONTENT_DIR="${WIKI_CONTENT_DIR:-$SCRIPT_DIR/../wiki-content}"
 MEDIAWIKI_DIR="${MEDIAWIKI_DIR:-/usr/share/webapps/mediawiki}"
 WIKI_RUN_USER="${WIKI_RUN_USER:-http}"
 SUMMARY="${WIKI_IMPORT_SUMMARY:-Contenido inicial de la wiki de ChurrOS}"
+REBUILD_SEARCH="${WIKI_REBUILD_SEARCH:-1}"
 PHP_BIN="${PHP_BIN:-php}"
 
 if [[ ! -f "$MEDIAWIKI_DIR/maintenance/run.php" ]]; then
@@ -27,10 +28,7 @@ if (( ${#files[@]} == 0 )); then
   exit 1
 fi
 
-cmd=("$PHP_BIN" "$MEDIAWIKI_DIR/maintenance/run.php" importTextFiles --overwrite --rc --summary "$SUMMARY" "${files[@]}")
-
-echo "Importando ${#files[@]} páginas desde $CONTENT_DIR"
-
+as_root=0
 if [[ "$(id -u)" -eq 0 ]]; then
   if ! command -v runuser >/dev/null 2>&1; then
     echo "runuser no está disponible. Ejecuta el script como el usuario de MediaWiki." >&2
@@ -40,7 +38,22 @@ if [[ "$(id -u)" -eq 0 ]]; then
     echo "El usuario de MediaWiki no existe: $WIKI_RUN_USER" >&2
     exit 1
   fi
-  exec runuser -u "$WIKI_RUN_USER" -- "${cmd[@]}"
+  as_root=1
 fi
 
-exec "${cmd[@]}"
+run_mediawiki() {
+  if [[ "$as_root" -eq 1 ]]; then
+    runuser -u "$WIKI_RUN_USER" -- "$@"
+  else
+    "$@"
+  fi
+}
+
+echo "Importando ${#files[@]} páginas desde $CONTENT_DIR"
+run_mediawiki "$PHP_BIN" "$MEDIAWIKI_DIR/maintenance/run.php" importTextFiles \
+  --overwrite --rc --summary "$SUMMARY" "${files[@]}"
+
+if [[ "$REBUILD_SEARCH" != "0" ]]; then
+  echo "Reconstruyendo el índice de búsqueda..."
+  run_mediawiki "$PHP_BIN" "$MEDIAWIKI_DIR/maintenance/run.php" rebuildtextindex
+fi
