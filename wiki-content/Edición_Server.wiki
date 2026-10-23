@@ -1,0 +1,66 @@
+'''Edición Server''' es la variante de ChurrOS pensada para servidores: el sistema instalado no tiene escritorio gráfico y se administra por SSH. Comparte la base Arch Linux, Btrfs, GRUB para UEFI y Syslinux para BIOS con las demás ediciones.
+
+== Cómo obtenerla ==
+La edición Server no se publica como ISO en la página de descargas. Se construye desde el repositorio oficial:
+
+<pre>
+git clone https://github.com/ChurrOS-GNU-Linux/ChurrOS.git
+cd ChurrOS
+./churros build --edition server
+</pre>
+
+Necesitas un entorno Arch Linux con las herramientas de compilación de ChurrOS. Consulta el README del repositorio para preparar las dependencias.
+
+== Qué incluye ==
+* Base Arch Linux <code>x86_64</code> con Btrfs.
+* NetworkManager con <code>iwd</code> para Wi-Fi.
+* <code>sshd</code>, <code>chronyd</code>, <code>ufw</code> y <code>fail2ban</code> habilitados.
+* Herramientas de diagnóstico y administración como <code>htop</code>, <code>tmux</code>, <code>lsof</code>, <code>jq</code>, <code>strace</code>, <code>git</code>, <code>rsync</code>, <code>tcpdump</code>, <code>vim</code> y <code>nano</code>.
+* Sin PipeWire ni audio: es una edición sin escritorio.
+
+El sistema instalado ocupa aproximadamente 1843 MiB, frente a los 3142 MiB de Niri. La ISO es más grande porque incluye un XFCE mínimo para poder mostrar el instalador Calamares; <code>configure-server</code> elimina ese escritorio al terminar la instalación y deja el arranque en <code>multi-user.target</code>.
+
+== Instalación ==
+El instalador de ChurrOS es Calamares, que es gráfico: la ISO necesita una sesión gráfica para mostrar la ventana de instalación. No hay instalación por consola.
+
+Si el servidor no tiene KVM ni consola gráfica, necesitarás otro método: instalación manual de Arch Linux, una imagen propia construida con <code>mkarchiso</code> o aprovisionamiento por tu plataforma. La ISO de Server está pensada para equipos donde puedas abrir el instalador una vez.
+
+Durante la instalación se ejecuta <code>configure-server</code>, que:
+* Elimina los paquetes del escritorio y las aplicaciones gráficas propias.
+* Deshabilita <code>greetd</code>.
+* Habilita <code>sshd</code>, <code>chronyd</code>, NetworkManager, <code>ufw</code> y <code>fail2ban</code>.
+* Registra cada paso en <code>/var/log/churros-server.log</code>.
+
+== Primer arranque ==
+Una vez instalado, inicia sesión en la consola o por SSH con el usuario creado en el instalador. La contraseña es la misma de las otras ediciones.
+
+<pre>
+ip a
+systemctl status sshd
+ssh usuario@IP_DEL_SERVIDOR
+</pre>
+
+<code>sshd</code> escucha en el puerto 22. Para conocer la IP, usa <code>ip a</code> o <code>hostname -I</code>.
+
+== Endurecimiento recomendado ==
+La instalación deja autenticación SSH por contraseña, que es lo que configura Calamares. Para un servidor expuesto a Internet conviene:
+* Crear una clave SSH y desactivar <code>PasswordAuthentication</code>.
+* Revisar las reglas de <code>ufw</code> y abrir solo los puertos necesarios.
+* Mantener <code>fail2ban</code> activo y revisar sus bloqueos.
+* Actualizar el sistema con <code>sudo pacman -Syu</code> antes de ponerlo en producción.
+* Revisar <code>/var/log/churros-server.log</code> tras la instalación.
+
+== Limitaciones conocidas ==
+* El instalador sigue siendo gráfico; no hay instalación por consola.
+* El arranque real de la edición Server no se prueba en CI. Construye la ISO y verifica el arranque antes de usarla en producción.
+* No incluye VNC ni RDP. Si necesitas acceso gráfico, tendrás que añadirlo y endurecerlo por tu cuenta.
+* La autenticación SSH por contraseña viene activada; cámbiala si el servidor es accesible desde fuera.
+
+== Relacionado ==
+* [[Ediciones de ChurrOS]]
+* [[Instalar ChurrOS]]
+* [[Actualizar ChurrOS]]
+* [[Red y conectividad]]
+* [[Solución de problemas]]
+
+[[Categoría:Referencia]]

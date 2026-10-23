@@ -1,0 +1,72 @@
+Esta página resume lo que conviene hacer después de instalar ChurrOS por primera vez.
+
+== 1. Inicia sesión ==
+Usa el usuario y la contraseña que creaste en el instalador. En Niri la sesión se inicia automáticamente en greetd; en XFCE también se usa greetd, con la sesión de XFCE como entorno predeterminado.
+
+Si acabas de instalar y no recuerdas la contraseña, inicia la ISO live, monta la partición raíz y usa <code>arch-chroot</code> para cambiarla.
+
+== 2. Conecta el equipo ==
+En Niri, abre el centro de control desde la barra de Noctalia o con <code>Mod + C</code>. En XFCE, usa el icono de red del panel.
+
+Desde una terminal:
+
+<pre>
+nmcli device status
+nmcli device wifi list
+nmcli device wifi connect "NOMBRE_DE_LA_RED" password "CONTRASEÑA"
+</pre>
+
+En una instalación con cable, NetworkManager suele conectarse sola. Comprueba la conexión con <code>ping -c 3 archlinux.org</code>.
+
+== 3. Actualiza el sistema ==
+ChurrOS es una distribución de liberación continua basada en Arch Linux. La primera actualización es importante porque la ISO puede tener algunos días.
+
+<pre>
+sudo pacman -Syu
+</pre>
+
+Reinicia si la actualización incluye el kernel, systemd o los controladores gráficos. En instalaciones con Btrfs, el hook de pacman crea un snapshot antes de la transacción; consulta [[Rollback con Btrfs]].
+
+No uses <code>pacman -Sy</code> sin actualizar el resto del sistema. Eso deja el sistema en un estado parcial y puede romper dependencias.
+
+== 4. Instala el software que necesites ==
+ChurrOS incluye Firefox, una terminal, el gestor de archivos y las aplicaciones propias. Para el resto puedes usar los repositorios oficiales de Arch:
+
+<pre>
+sudo pacman -S libreoffice-fresh
+sudo pacman -S gimp vlc
+</pre>
+
+Las ediciones de escritorio incluyen Bazaar, una tienda de aplicaciones Flatpak, y Flatpak. Para paquetes de AUR está disponible <code>yay</code>; úsalo con cuidado y revisa el PKGBUILD antes de instalar. Más detalles en [[Gestionar paquetes]].
+
+== 5. Comprueba la instalación ==
+El instalador deja un registro de verificación en:
+
+<pre>
+/var/log/churros-install-verify.log
+</pre>
+
+Comprueba que no haya errores y que la edición instalada sea la correcta:
+
+<pre>
+cat /etc/churros-edition
+</pre>
+
+== 6. Aprende los atajos y la configuración ==
+* En Niri, consulta [[Escritorio Niri]] para ver los atajos principales.
+* En XFCE, consulta [[Escritorio XFCE]].
+* Revisa [[Aplicaciones de ChurrOS]] para conocer las apps propias y los atajos.
+* Abre <code>churros-settings</code> para cambiar el fondo, el acento, la red y las actualizaciones. En Niri se abre con <code>Mod + P</code>.
+* La aplicación <code>churros-welcome</code> muestra información del sistema y accesos rápidos.
+
+== 7. Guarda una copia de seguridad ==
+Antes de hacer cambios grandes, guarda tus archivos personales. Si usas Btrfs, los snapshots del sistema no sustituyen una copia de seguridad externa: protegen contra una actualización defectuosa, no contra un disco dañado.
+
+== Siguientes pasos ==
+* [[Actualizar ChurrOS]]
+* [[Red y conectividad]]
+* [[Solución de problemas]]
+* [[Comunidad y soporte]]
+
+[[Categoría:Guías]]
+[[Categoría:Destacados]]

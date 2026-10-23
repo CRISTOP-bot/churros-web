@@ -1,0 +1,63 @@
+ChurrOS se publica en tres ediciones. La edición se elige al construir la ISO y no se puede cambiar después con un simple ajuste: cada una tiene su propia lista de paquetes y su propia sesión.
+
+{| class="wikitable"
+! Edición
+! Escritorio
+! Sesión
+! Paquetes
+! Tamaño instalado
+|-
+| Niri
+| Niri (Wayland)
+| greetd + <code>churros-niri-session</code>
+| 206
+| 3142 MiB
+|-
+| XFCE
+| XFCE (X11)
+| greetd + <code>churros-xfce-session</code>
+| 214
+| 3097 MiB
+|-
+| Server
+| Sin escritorio
+| Consola y SSH
+| 185
+| 1843 MiB
+|}
+
+Los tamaños son el cierre de dependencias medido contra las bases de paquetes de Arch Linux. No incluyen tus archivos personales ni el software que instales después.
+
+== Niri Edition ==
+Es la edición predeterminada. Usa [https://github.com/YaLTeR/niri Niri], un compositor Wayland de mosaicos desplazables, junto con Noctalia como barra y centro de control, <code>foot</code> como terminal y Firefox.
+
+Está pensada para quien quiere un escritorio moderno, rápido y muy orientado al teclado. Los atajos se explican en [[Escritorio Niri]].
+
+Incluye las aplicaciones propias de ChurrOS (ver [[Aplicaciones de ChurrOS]]), Bazaar para Flatpak y <code>yay</code> para AUR. La edición XFCE también incorpora Bazaar, Flatpak y <code>yay</code>.
+
+== XFCE Edition ==
+Usa XFCE sobre X11, con el panel superior, el menú Whisker, Thunar, terminal de XFCE y las utilidades habituales del escritorio. Es una opción cómoda si vienes de Windows o prefieres ventanas flotantes y un menú de aplicaciones clásico.
+
+Consume pocos recursos y es una buena elección para equipos modestos que necesitan un entorno familiar. Consulta [[Escritorio XFCE]].
+
+== Server Edition ==
+No incluye escritorio en el sistema instalado. La ISO lleva un XFCE mínimo porque el instalador Calamares es gráfico, pero <code>configure-server</code> lo elimina al terminar la instalación. Consulta [[Edición Server]] para saber cómo construirla y administrarla.
+
+Incluye <code>sshd</code>, <code>chronyd</code>, <code>ufw</code> y <code>fail2ban</code>, además de herramientas como <code>htop</code>, <code>tmux</code>, <code>lsof</code>, <code>jq</code> y <code>strace</code>. No incluye PipeWire: es una edición sin audio.
+
+Limitaciones importantes:
+* El instalador sigue siendo gráfico; no hay instalación por consola.
+* El acceso remoto es por SSH con contraseña, tal como lo deja Calamares. Endurecerlo con claves es una decisión manual.
+* No hay VNC ni RDP configurados.
+
+== ¿Cuál elegir? ==
+* Si quieres un escritorio moderno y trabajar con el teclado: '''Niri'''.
+* Si quieres un escritorio clásico y sencillo: '''XFCE'''.
+* Si vas a administrar un servidor sin entorno gráfico: '''Server'''.
+
+== Siguiente paso ==
+* [[Requisitos del sistema]]
+* [[Descargar ChurrOS]]
+* [[Instalar ChurrOS]]
+
+[[Categoría:Referencia]]

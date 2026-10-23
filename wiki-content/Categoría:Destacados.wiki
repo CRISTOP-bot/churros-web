@@ -1,0 +1,3 @@
+Esta categoría reúne los artículos recomendados para empezar a usar ChurrOS: instalación, primeros pasos, solución de problemas y soporte.
+
+Para añadir una página a esta categoría, incluye <code>Categoría:Nombre</code> al final del artículo.

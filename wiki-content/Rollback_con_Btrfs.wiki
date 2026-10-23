@@ -1,0 +1,58 @@
+ChurrOS incluye un sistema de rollback basado en snapshots de Btrfs. Antes de cada transacción de pacman se guarda una copia del sistema para poder volver atrás si una actualización rompe algo.
+
+== Cómo funciona ==
+La instalación por defecto usa Btrfs con subvolúmenes:
+
+<pre>
+/        -> @
+/home    -> @home
+snapshots -> @snapshots
+</pre>
+
+El subvolumen <code>@snapshots</code> está aislado de <code>@</code>, así que un snapshot no contiene snapshots anidados.
+
+Un hook de pacman (<code>/etc/pacman.d/hooks/50-churros-snapshot.hook</code>) crea el snapshot antes de <code>pacman -Syu</code>, <code>-S</code> o <code>-R</code>. Si el snapshot falla, por ejemplo porque el sistema no es Btrfs, la transacción continúa.
+
+Se conservan los últimos '''5''' snapshots por defecto. Los más antiguos se eliminan automáticamente.
+
+== Comandos ==
+<pre>
+sudo churros-snapshot create "antes de probar algo"
+sudo churros-snapshot list
+sudo churros-snapshot list --json
+sudo churros-snapshot info 20260824-163000
+sudo churros-snapshot delete 20260824-163000
+sudo churros-snapshot cleanup 5
+</pre>
+
+El identificador (<code>stamp</code>) es la fecha y hora del snapshot, por ejemplo <code>20260824-163000</code>.
+
+== Restaurar ==
+El subvolumen raíz está montado y en uso, así que no se puede restaurar desde el sistema en marcha. Para volver a un snapshot:
+
+# Arranca la ISO live de ChurrOS.
+# Abre una terminal y localiza el disco con <code>lsblk</code>.
+# Ejecuta como root:
+
+<pre>
+sudo churros-snapshot restore -d /dev/sdX 20260824-163000
+</pre>
+
+Sustituye <code>/dev/sdX</code> por el disco donde está instalado ChurrOS, no por una partición.
+
+Al reiniciar, el sistema queda en el estado del snapshot. El estado anterior se conserva como <code>@broken-FECHA</code> y <code>@home.broken-FECHA</code> por si necesitas recuperar algún archivo. Puedes borrarlo cuando ya no lo necesites.
+
+== Interfaz gráfica ==
+<code>churros-settings</code> incluye una sección de actualizaciones con la lista de snapshots, creación y eliminación, además de la guía de restauración. En Niri se abre con <code>Mod + P</code>.
+
+== Limitaciones ==
+* Solo aplica a instalaciones Btrfs. En ext4 el hook se ignora.
+* Los snapshots consumen espacio. Revisa <code>sudo churros-snapshot list</code> y limpia los antiguos si el disco está justo.
+* No son una copia de seguridad externa. Si el disco falla, los snapshots se pierden con él.
+* Restaurar un snapshot devuelve el sistema a ese momento; los archivos creados después se conservan aparte en el subvolumen roto, pero no vuelven automáticamente a su sitio.
+
+== Siguiente paso ==
+* [[Actualizar ChurrOS]]
+* [[Solución de problemas]]
+
+[[Categoría:Guías]]

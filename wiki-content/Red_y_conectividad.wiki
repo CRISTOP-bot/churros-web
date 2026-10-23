@@ -1,0 +1,94 @@
+ChurrOS usa '''NetworkManager''' para gestionar las conexiones de red. En Niri puedes usar la barra y el centro de control de Noctalia; en XFCE, el icono de red del panel.
+
+== Estado de la red ==
+<pre>
+nmcli device status
+nmcli connection show
+ip address
+</pre>
+
+== Wi-Fi ==
+<pre>
+nmcli device wifi list
+nmcli device wifi connect "NOMBRE_DE_LA_RED" password "CONTRASEÑA"
+nmcli connection show --active
+</pre>
+
+Si la red no aparece:
+<pre>
+nmcli radio wifi
+sudo nmcli radio wifi on
+nmcli device wifi rescan
+</pre>
+
+Para una red oculta:
+<pre>
+nmcli device wifi connect "NOMBRE_DE_LA_RED" password "CONTRASEÑA" hidden yes
+</pre>
+
+== Ethernet ==
+Con un cable conectado, NetworkManager suele crear la conexión automáticamente. Comprueba el estado con <code>nmcli device status</code> y la dirección IP con <code>ip address</code>.
+
+Para activar o desactivar una conexión:
+<pre>
+nmcli connection up "NOMBRE_DE_LA_CONEXION"
+nmcli connection down "NOMBRE_DE_LA_CONEXION"
+</pre>
+
+== Bluetooth ==
+En Niri, abre el centro de control de Noctalia. En XFCE, usa el icono de Bluetooth del panel o el gestor de configuración.
+
+Desde terminal:
+<pre>
+bluetoothctl
+power on
+scan on
+pair DIRECCIÓN
+connect DIRECCIÓN
+</pre>
+
+Comprueba que el adaptador no esté bloqueado:
+<pre>
+rfkill list bluetooth
+</pre>
+
+== Servidor y SSH ==
+La edición Server no incluye escritorio y se administra por SSH. Para conectarte desde otro equipo:
+
+<pre>
+ssh usuario@IP_DEL_SERVIDOR
+</pre>
+
+En el servidor:
+<pre>
+systemctl status sshd
+ip address
+sudo ufw status
+</pre>
+
+Si <code>ufw</code> está activo y el puerto 22 no está permitido, ábrelo antes de cerrar la sesión local:
+<pre>
+sudo ufw allow 22/tcp
+</pre>
+
+El acceso por contraseña es el que deja Calamares. Endurecer SSH con claves es una decisión manual; no cambies <code>PasswordAuthentication</code> sin haber probado antes la clave pública.
+
+== Diagnosticar problemas ==
+<pre>
+ping -c 3 archlinux.org
+resolvectl status
+journalctl -u NetworkManager -b
+dmesg | grep -i firmware
+lspci -k
+</pre>
+
+* Si <code>ping</code> a una IP funciona pero los nombres no resuelven, el problema es DNS.
+* Si el Wi-Fi no aparece, revisa <code>rfkill</code>, el controlador con <code>lspci -k</code> y el log del kernel.
+* Si la conexión se corta, comprueba la potencia de la señal y el canal de la red.
+* No edites <code>/etc/resolv.conf</code> a mano si lo gestiona NetworkManager o systemd-resolved; usa la configuración de la conexión.
+
+== Siguiente paso ==
+* [[Solución de problemas]]
+* [[Comunidad y soporte]]
+
+[[Categoría:Guías]]

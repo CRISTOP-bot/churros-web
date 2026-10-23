@@ -145,6 +145,36 @@ sudo systemctl reload nginx.service
 
 No abras los puertos 3000, 8081 o 3306 en el firewall. El único punto público debe ser el vhost HTTPS de ChurrOS.
 
+## Contenido inicial
+
+El repositorio incluye `wiki-content/` con las páginas base de la wiki en wikitext: portada, primeros pasos, descarga, instalación, ediciones, edición Server, aplicaciones, requisitos, actualizaciones, red, escritorios, rollback, solución de problemas, preguntas frecuentes, comunidad, contribución e historial de versiones. Las categorías iniciales son `Destacados`, `Guías`, `Referencia` y `Comunidad`.
+
+Copia el sitio en `/srv/http/churros-web` y ejecuta el importador como root. El script usa `maintenance/run.php importTextFiles`, conserva el historial, crea entradas en cambios recientes y no vuelve a escribir páginas cuyo contenido no cambió:
+
+```bash
+cd /srv/http/churros-web
+sudo ./scripts/import-wiki-content.sh
+```
+
+El script valida que exista MediaWiki y ejecuta la importación como el usuario `http`:
+
+| Variable | Valor por defecto | Uso |
+|---|---|---|
+| `MEDIAWIKI_DIR` | `/usr/share/webapps/mediawiki` | Raíz de MediaWiki |
+| `WIKI_CONTENT_DIR` | `wiki-content/` del repositorio | Directorio con los `.wiki` |
+| `WIKI_RUN_USER` | `http` | Usuario que ejecuta el mantenimiento |
+| `WIKI_IMPORT_SUMMARY` | `Contenido inicial de la wiki de ChurrOS` | Resumen de las revisiones |
+
+No se necesitan credenciales de OAuth ni de bot: el script se ejecuta en el servidor y escribe directamente en la base de datos de MediaWiki. No lo ejecutes desde el navegador ni lo expongas por HTTP.
+
+Después de importar, comprueba que la portada y la categoría destacada coinciden con la configuración del BFF:
+
+```bash
+curl --fail --silent 'http://127.0.0.1:3000/api/wiki/home'
+```
+
+La portada debe ser `Página principal` y la categoría destacada debe contener artículos en `Destacados`.
+
 ## Comprobaciones
 
 ```bash

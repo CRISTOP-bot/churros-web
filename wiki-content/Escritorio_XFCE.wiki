@@ -1,0 +1,61 @@
+La edición XFCE usa XFCE sobre X11. Es un escritorio tradicional de ventanas flotantes, con panel superior, menú de aplicaciones y las utilidades clásicas de XFCE.
+
+== Elementos del escritorio ==
+* '''Panel superior''': menú Whisker, lista de ventanas, bandeja del sistema, volumen, batería, reloj y botones de sesión.
+* '''Thunar''': gestor de archivos.
+* '''Terminal de XFCE''': terminal con la paleta de ChurrOS.
+* '''Firefox''': navegador incluido.
+* '''Bazaar''': tienda de aplicaciones Flatpak.
+* '''Aplicaciones propias''': <code>churros-settings</code>, <code>churros-welcome</code> y el centro de control.
+* '''Utilidades''': captura de pantalla, monitor de tareas, visor de imágenes y editor de texto.
+
+== Menú Whisker ==
+El botón de inicio abre el menú Whisker, con búsqueda, favoritos y categorías. Es la forma más rápida de encontrar una aplicación instalada.
+
+== Configuración ==
+Abre '''Configuración''' desde el menú o ejecuta:
+
+<pre>
+xfce4-settings-manager
+</pre>
+
+Desde ahí puedes cambiar:
+* Apariencia, tema e iconos.
+* Fondo de pantalla.
+* Panel y complementos.
+* Teclado y ratón.
+* Pantalla y monitores.
+* Energía y batería.
+* Notificaciones y sesión de usuario.
+
+ChurrOS aplica un tema oscuro con acento naranja. La configuración de XFCE vive en <code>~/.config/xfce4/</code> y en <code>~/.config/gtk-3.0/</code>. Antes de editar archivos a mano, haz una copia.
+
+== Aplicaciones y paquetes ==
+Puedes instalar software con pacman o Flatpak. Consulta [[Gestionar paquetes]].
+
+Si una aplicación GTK se ve con un tema distinto, revisa la configuración de apariencia en <code>xfce4-settings-manager</code> antes de cambiar variables de entorno.
+
+== Sesión ==
+Para cerrar sesión, reiniciar o apagar, usa el botón de sesión del panel o:
+
+<pre>
+xfce4-session-logout
+</pre>
+
+La sesión se inicia con greetd y el lanzador <code>churros-xfce-session</code>, que configura las variables de X11 y el entorno de Xorg.
+
+== Capturas de pantalla ==
+La utilidad de captura de XFCE permite capturar la pantalla completa, una ventana o una región. También puedes asignar una tecla desde '''Configuración > Teclado > Atajos de teclado'''.
+
+== Problemas comunes ==
+* '''El panel no aparece''': cierra sesión y vuelve a entrar; si persiste, revisa la configuración del panel en <code>~/.config/xfce4/panel/</code>.
+* '''El tema se ve roto''': comprueba que el tema y los iconos estén instalados y seleccionados en Apariencia.
+* '''No hay sonido''': comprueba PipeWire y WirePlumber; consulta [[Solución de problemas]].
+* '''La red no conecta''': usa el icono del panel o <code>nmcli</code>; consulta [[Red y conectividad]].
+
+== Siguiente paso ==
+* [[Ediciones de ChurrOS]]
+* [[Gestionar paquetes]]
+* [[Solución de problemas]]
+
+[[Categoría:Guías]]

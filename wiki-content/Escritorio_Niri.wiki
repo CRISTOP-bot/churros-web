@@ -1,0 +1,115 @@
+La edición Niri usa [https://github.com/YaLTeR/niri Niri], un compositor Wayland de mosaicos desplazables. No hay ventanas flotantes por defecto: las ventanas se organizan en columnas y puedes desplazarte horizontalmente por el escritorio.
+
+== Atajos principales ==
+La tecla <code>Mod</code> es la tecla '''Super''' (Windows o Command).
+
+{| class="wikitable"
+! Atajo
+! Acción
+|-
+| <code>Mod + Return</code>
+| Abrir la terminal <code>foot</code>
+|-
+| <code>Mod + Q</code>
+| Cerrar la ventana activa
+|-
+| <code>Mod + Space</code>
+| Abrir el lanzador de Noctalia
+|-
+| <code>Mod + Shift + Space</code>
+| Abrir Fuzzel como lanzador alternativo
+|-
+| <code>Mod + C</code>
+| Abrir el centro de control de Noctalia
+|-
+| <code>Mod + P</code>
+| Abrir <code>churros-settings</code>
+|-
+| <code>Mod + W</code>
+| Abrir <code>churros-welcome</code>
+|-
+| <code>Mod + S</code>
+| Abrir Bazaar (tienda Flatpak)
+|-
+| <code>Mod + F</code>
+| Maximizar la columna activa
+|-
+| <code>Mod + Shift + F</code>
+| Pantalla completa
+|-
+| <code>Mod + V</code>
+| Alternar ventana flotante
+|-
+| <code>Mod + O</code>
+| Ver el panorama de ventanas
+|-
+| <code>Mod + Shift + E</code>
+| Menú de sesión
+|-
+| <code>Mod + 1..9</code>
+| Cambiar al espacio de trabajo
+|-
+| <code>Mod + Shift + 1..9</code>
+| Mover la ventana al espacio de trabajo
+|-
+| <code>Mod + Flechas</code>
+| Mover el foco entre columnas y ventanas
+|-
+| <code>Impr Pant</code>
+| Captura interactiva
+|-
+| <code>Ctrl + Impr Pant</code>
+| Captura de toda la pantalla
+|-
+| <code>Alt + Impr Pant</code>
+| Captura de la ventana activa
+|}
+
+== Noctalia ==
+Noctalia es la barra, el lanzador, las notificaciones y el centro de control. Se configura en <code>~/.config/noctalia/config.toml</code>. Los ajustes que cambias desde su interfaz se guardan en <code>~/.local/state/noctalia/settings.toml</code> y tienen prioridad.
+
+Puedes controlarlo desde terminal:
+<pre>
+noctalia msg panel-toggle launcher
+noctalia msg panel-toggle control-center
+noctalia msg theme-mode-set dark
+</pre>
+
+El log está en <code>~/.cache/noctalia/noctalia.log</code>.
+
+== Configuración de Niri ==
+La configuración vive en <code>~/.config/niri/config.kdl</code>. Antes de editarla, haz una copia:
+
+<pre>
+cp ~/.config/niri/config.kdl ~/.config/niri/config.kdl.bak
+</pre>
+
+Niri agrupa la configuración en bloques: <code>input</code>, <code>layout</code>, <code>binds</code>, <code>spawn-at-startup</code> y reglas de ventana. Después de guardar, comprueba si los cambios se aplican. Si algo queda en un estado raro, cierra sesión y vuelve a entrar.
+
+La configuración por defecto de ChurrOS usa:
+* Gaps de 8 px.
+* Borde de 2 px, naranja <code>#f97316</code> en la ventana activa.
+* Terminal <code>foot</code>.
+* Noctalia, <code>churros-portal-start</code> y <code>churros-welcome</code> al iniciar.
+
+== Espacios de trabajo ==
+Niri usa espacios de trabajo dinámicos. Cambia con <code>Mod + 1..9</code> y mueve ventanas con <code>Mod + Shift + 1..9</code>. Las columnas se desplazan con <code>Mod + Flechas</code>; si te pierdes, <code>Mod + O</code> muestra el panorama.
+
+== Notificaciones y multimedia ==
+Las notificaciones las gestiona Noctalia. Las teclas de volumen, brillo y reproducción funcionan con las teclas multimedia del equipo. Si no funcionan, comprueba que el teclado las envíe con <code>wev</code> o revisa la configuración de Niri.
+
+== Aplicaciones GTK y Qt ==
+Niri fuerza Wayland para las aplicaciones GTK y Qt cuando es posible. Firefox usa Wayland nativo. Algunas aplicaciones antiguas pueden abrirse con XWayland; si tienes problemas, revisa la variable de entorno de la aplicación antes de cambiar la configuración global.
+
+== Problemas comunes ==
+* '''La barra no aparece''': comprueba <code>noctalia</code> en <code>spawn-at-startup</code> y revisa su log.
+* '''Una ventana no se mueve''': puede estar en modo flotante; pulsa <code>Mod + V</code>.
+* '''El teclado no responde como esperas''': revisa el layout en el bloque <code>input</code>.
+* '''Un atajo no funciona''': comprueba que no esté duplicado en <code>binds</code>.
+
+== Siguiente paso ==
+* [[Ediciones de ChurrOS]]
+* [[Gestionar paquetes]]
+* [[Solución de problemas]]
+
+[[Categoría:Guías]]

@@ -1,0 +1,74 @@
+ChurrOS es software libre y crece con la comunidad. No hace falta ser programador para ayudar.
+
+== Formas de contribuir ==
+* '''Documentación''': corrige errores, amplía guías y traduce contenido.
+* '''Pruebas''': arranca la ISO en hardware real o en una máquina virtual y reporta fallos.
+* '''Errores''': abre un issue con pasos reproducibles, logs y versión.
+* '''Código''': mejora el CLI, las aplicaciones Rust, el instalador o los scripts de construcción.
+* '''Diseño y branding''': iconos, temas, capturas y materiales.
+* '''Difusión''': comparte el proyecto y ayuda a otros usuarios.
+
+Antes de empezar, lee el [https://github.com/ChurrOS-GNU-Linux/ChurrOS/blob/main/CODE_OF_CONDUCT.md código de conducta].
+
+== Entorno de desarrollo ==
+La construcción de la ISO está pensada para Arch Linux o una distribución basada en Arch. También puedes usar el contenedor de build desde otras distribuciones.
+
+<pre>
+git clone https://github.com/ChurrOS-GNU-Linux/ChurrOS.git
+cd ChurrOS
+./install-deps.sh
+./churros doctor
+./churros check
+</pre>
+
+Construir y probar:
+
+<pre>
+./churros build
+./churros run
+</pre>
+
+Para la edición XFCE:
+
+<pre>
+./churros build --edition xfce
+</pre>
+
+Las apps oficiales están en Rust. Para compilarlas y ejecutar sus pruebas:
+
+<pre>
+./churros rust
+cargo test -p churros-welcome
+</pre>
+
+== Flujo de trabajo ==
+1. Crea una rama para tu cambio; no trabajes directamente sobre <code>main</code>.
+2. Haz cambios pequeños y coherentes.
+3. Ejecuta las comprobaciones que apliquen: <code>./churros check</code>, pruebas de Rust o una construcción de la ISO.
+4. Abre un pull request describiendo qué cambia y cómo lo probaste.
+5. Responde a la revisión. Si un cambio es grande, abre antes un issue para discutir el enfoque.
+
+== Documentación ==
+La wiki se edita desde la propia wiki con una cuenta de MediaWiki. El contenido inicial también se versiona en el repositorio, en <code>wiki-content/</code>, para poder reinstalarlo en una instancia nueva.
+
+En el servidor de la wiki:
+
+<pre>
+sudo ./scripts/import-wiki-content.sh
+</pre>
+
+El script usa <code>maintenance/run.php importTextFiles</code> de MediaWiki, conserva el historial y no sobrescribe páginas que no hayan cambiado. No contiene credenciales ni las pide por la red.
+
+Si detectas un error en una página, corrígelo desde la wiki. Si el cambio afecta al contenido base, actualiza también el archivo correspondiente de <code>wiki-content/</code> en el mismo pull request.
+
+== Seguridad ==
+No publiques vulnerabilidades en un issue público. Sigue el procedimiento de [https://github.com/ChurrOS-GNU-Linux/ChurrOS/blob/main/SECURITY.md SECURITY.md].
+
+== Licencia ==
+El código del proyecto se publica bajo GPL-3.0. Al contribuir, aceptas que tu aporte se distribuya bajo esa licencia. Las dependencias y aplicaciones de terceros conservan sus propias licencias.
+
+== Siguiente paso ==
+* [[Comunidad y soporte]]
+* [[Preguntas frecuentes]]
+
+[[Categoría:Comunidad]]

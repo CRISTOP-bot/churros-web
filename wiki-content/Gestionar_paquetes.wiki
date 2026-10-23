@@ -1,0 +1,85 @@
+ChurrOS usa '''pacman''', el gestor de paquetes de Arch Linux. Además incluye <code>yay</code> para AUR y Flatpak para aplicaciones de escritorio.
+
+== Buscar e instalar ==
+<pre>
+pacman -Ss navegador
+sudo pacman -S firefox
+sudo pacman -S --needed libreoffice-fresh gimp vlc
+</pre>
+
+<code>--needed</code> evita reinstalar un paquete que ya está actualizado.
+
+== Información de un paquete ==
+<pre>
+pacman -Si firefox
+pacman -Qi firefox
+pacman -Ql firefox
+</pre>
+
+== Eliminar ==
+<pre>
+sudo pacman -Rns nombre-del-paquete
+</pre>
+
+<code>-Rns</code> elimina el paquete, sus dependencias que ya no se usan y los archivos de configuración. Revisa la lista antes de confirmar: si otro paquete depende de él, pacman te avisará.
+
+Para ver paquetes huérfanos:
+
+<pre>
+pacman -Qtdq
+</pre>
+
+== Actualizar ==
+<pre>
+sudo pacman -Syu
+</pre>
+
+Consulta [[Actualizar ChurrOS]] para las precauciones y el orden recomendado.
+
+== Limpiar la caché ==
+<pre>
+sudo pacman -Sc
+</pre>
+
+Elimina paquetes antiguos de la caché. Conserva la versión instalada, pero si necesitas volver a una versión anterior quizá ya no esté disponible. No uses <code>pacman -Scc</code> sin entender que borra toda la caché.
+
+== AUR con yay ==
+AUR es un repositorio mantenido por la comunidad. No es un repositorio oficial y sus paquetes no pasan por la revisión de Arch.
+
+<pre>
+yay -Ss nombre
+yay -S nombre
+yay -Sua
+</pre>
+
+Revisa el PKGBUILD y los comentarios antes de instalar o actualizar un paquete de AUR. Si no sabes qué hace un paquete, no lo instales.
+
+== Flatpak y Bazaar ==
+Las ediciones de escritorio incluyen Flatpak y Bazaar, una tienda gráfica para Flatpak. En Niri puedes abrir Bazaar con <code>Mod + S</code>; en XFCE está en el menú de aplicaciones.
+
+Desde terminal:
+
+<pre>
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak search nombre
+flatpak install flathub org.example.App
+flatpak update
+flatpak list
+</pre>
+
+Los Flatpak se actualizan aparte de pacman. El centro de actualizaciones de <code>churros-settings</code> también los comprueba.
+
+== Repositorios oficiales ==
+Las listas de repositorios están en <code>/etc/pacman.conf</code> y los mirrors en <code>/etc/pacman.d/mirrorlist</code>. No edites esos archivos sin una copia de seguridad. Si un mirror falla, cambia la lista y ejecuta <code>sudo pacman -Syu</code>.
+
+== Solución rápida ==
+* '''No se encuentra un paquete''': actualiza las listas con <code>sudo pacman -Syu</code>, no solo con <code>-Sy</code>.
+* '''Conflicto de archivos''': lee qué paquete es el propietario con <code>pacman -Qo /ruta/archivo</code>.
+* '''Error de firma''': actualiza el llavero y repite la actualización completa.
+* '''Dependencias rotas''': revisa el error completo y no fuerza la instalación con <code>--overwrite</code> salvo que sepas exactamente qué estás haciendo.
+
+== Siguiente paso ==
+* [[Actualizar ChurrOS]]
+* [[Solución de problemas]]
+
+[[Categoría:Guías]]

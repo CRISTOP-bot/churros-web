@@ -1,0 +1,55 @@
+ChurrOS incluye aplicaciones propias escritas en Rust con GTK 4 y libadwaita, además de herramientas estándar de Arch Linux. Esta página resume las que verás en el día a día.
+
+== churros-welcome ==
+Pantalla de bienvenida de la sesión Live. Muestra información del sistema (CPU, RAM, espacio en <code>/</code>, uptime, kernel, arquitectura y hostname) y ofrece accesos rápidos para instalar ChurrOS, abrir el repositorio de GitHub y visitar la comunidad.
+
+En Niri se abre maximizada al iniciar la sesión; en XFCE aparece como una ventana centrada. También puedes abrirla desde el menú de aplicaciones.
+
+== churros-settings ==
+Aplicación principal de configuración. Permite cambiar tema, color de acento, fondo de pantalla y opciones de Niri, Mako y otros componentes.
+
+* En Niri: <code>Mod + P</code>.
+* En XFCE: menú de aplicaciones → Configuración de ChurrOS.
+
+Los cambios se guardan en <code>~/.config/churros/</code> y en los archivos de configuración del escritorio correspondiente.
+
+== churros-control-center ==
+Centro de control con tarjetas de red, Bluetooth, brillo, batería y audio. Cada tarjeta abre el panel rápido correspondiente.
+
+En Niri, <code>Mod + C</code> abre el centro de control de Noctalia, que es otra interfaz. El binario <code>churros-control-center</code> se abre desde el lanzador o desde Waybar.
+
+== churros-popup ==
+Un único binario con seis paneles rápidos: red, audio, Bluetooth, energía, brillo y batería. Normalmente no se lanzan a mano: los abre <code>churros-control-center</code> o la barra. Solo puede haber un panel abierto a la vez. Los logs de arranque están en <code>/tmp/churros/</code>.
+
+== Bazaar ==
+Tienda gráfica para instalar aplicaciones Flatpak. Está disponible en las ediciones de escritorio.
+
+* En Niri: <code>Mod + S</code>.
+* En XFCE: menú de aplicaciones → Bazaar.
+
+Flatpak está incluido en el sistema. Para usarlo desde la terminal, comprueba primero los remotos configurados:
+
+<pre>
+flatpak remotes
+flatpak search nombre
+flatpak install flathub org.ejemplo.App
+flatpak run org.ejemplo.App
+</pre>
+
+== Fuzzel y el lanzador ==
+En Niri, <code>Mod + Space</code> abre el lanzador de Noctalia y <code>Mod + Shift + Space</code> abre Fuzzel. Ambos buscan aplicaciones instaladas y las ejecutan. En XFCE puedes usar el menú Whisker y el buscador del panel.
+
+== Terminal ==
+* Niri usa <code>foot</code>. Abre una terminal con <code>Mod + Return</code>.
+* XFCE usa Terminal de XFCE desde el menú de aplicaciones.
+
+== yay ==
+Ayudante de AUR disponible en las ediciones de escritorio. Instala paquetes de los repositorios oficiales y de AUR. Úsalo con cuidado y revisa el PKGBUILD antes de instalar software de AUR. Más detalles en [[Gestionar paquetes]].
+
+== Relacionado ==
+* [[Primeros pasos]]
+* [[Escritorio Niri]]
+* [[Escritorio XFCE]]
+* [[Gestionar paquetes]]
+
+[[Categoría:Guías]]

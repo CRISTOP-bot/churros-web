@@ -1,0 +1,59 @@
+ChurrOS es una distribución de liberación continua basada en Arch Linux. No hay versiones con soporte a largo plazo: el sistema se mantiene actualizando con frecuencia.
+
+== Actualización completa ==
+La forma recomendada es una actualización completa de los repositorios oficiales:
+
+<pre>
+sudo pacman -Syu
+</pre>
+
+Lee las advertencias de pacman antes de confirmar. Si una actualización requiere reiniciar, hazlo cuando termine.
+
+No uses <code>pacman -Sy</code> para instalar un paquete suelto sin actualizar el resto del sistema. Eso puede dejar bibliotecas y programas en versiones incompatibles.
+
+== Centro de actualizaciones ==
+La aplicación <code>churros-settings</code> incluye una sección de actualizaciones que comprueba paquetes de pacman, Flatpak y las utilidades de ChurrOS. En Niri se abre con <code>Mod + P</code>.
+
+También puedes actualizar Flatpak por separado:
+
+<pre>
+flatpak update
+</pre>
+
+== Paquetes de AUR ==
+Si instalaste paquetes de AUR con <code>yay</code>, actualízalos después de la actualización oficial:
+
+<pre>
+yay -Sua
+</pre>
+
+Revisa los cambios de los PKGBUILD cuando <code>yay</code> te lo pida. Un paquete de AUR no tiene el mismo soporte que un paquete oficial de Arch.
+
+== Snapshots y rollback ==
+En instalaciones Btrfs, un hook de pacman crea un snapshot antes de cada transacción. Si una actualización rompe el sistema, puedes volver a un estado anterior desde la ISO live. Consulta [[Rollback con Btrfs]].
+
+Los snapshots no son una copia de seguridad: viven en el mismo disco. Guarda tus archivos importantes en otro medio.
+
+== Si falla una firma o un mirror ==
+* Comprueba la conexión y la hora del sistema.
+* Si el error es de firma, actualiza el llavero <code>archlinux-keyring</code> siguiendo la guía de Arch Linux y vuelve a ejecutar <code>sudo pacman -Syu</code>.
+* Si un mirror falla o va lento, cambia la lista de mirrors. Puedes usar <code>reflector</code> si lo instalas, o editar <code>/etc/pacman.d/mirrorlist</code> con cuidado.
+* No dejes la actualización a medias: termina la transacción o restaura un snapshot.
+
+== Cuándo reiniciar ==
+Reinicia después de actualizar el kernel, systemd, los controladores gráficos o el firmware. Si no estás seguro, reiniciar no hace daño.
+
+== Comprobar el estado ==
+<pre>
+uname -r
+pacman -Q linux
+systemctl --failed
+journalctl -b -p err
+</pre>
+
+== Siguiente paso ==
+* [[Gestionar paquetes]]
+* [[Rollback con Btrfs]]
+* [[Solución de problemas]]
+
+[[Categoría:Guías]]

@@ -1,0 +1,58 @@
+== ¿Qué es ChurrOS? ==
+Es una distribución GNU/Linux colombiana basada en [https://archlinux.org Arch Linux], pensada para equipos con recursos limitados. Se construye con archiso e incluye escritorios Niri y XFCE, aplicaciones propias y un instalador gráfico basado en Calamares.
+
+== ¿Es gratis? ==
+Sí. El código del proyecto se publica bajo GPL-3.0. Las aplicaciones y componentes incluidos conservan sus propias licencias.
+
+== ¿Es lo mismo que Arch Linux? ==
+No. ChurrOS usa Arch Linux como base, pero añade su propio perfil de archiso, branding, configuraciones de escritorio, aplicaciones en Rust, temas y un instalador con pasos propios. Los paquetes oficiales siguen viniendo de los repositorios de Arch.
+
+== ¿Es una distribución de liberación continua? ==
+Sí. No hay versiones LTS. Se actualiza con <code>sudo pacman -Syu</code>. Consulta [[Actualizar ChurrOS]].
+
+== ¿Qué edición elijo? ==
+* '''Niri''' si quieres Wayland, mosaicos dinámicos y un flujo de trabajo con teclado.
+* '''XFCE''' si prefieres un escritorio tradicional, ligero y familiar.
+* '''Server''' si necesitas un sistema sin escritorio, administrado por SSH.
+
+Consulta [[Ediciones de ChurrOS]] para ver tamaños y diferencias.
+
+== ¿Cuánta RAM y disco necesita? ==
+No hay mínimos oficiales publicados. Como referencia práctica, usa 4 GB de RAM para el instalador gráfico y al menos 20 GB de disco, preferiblemente 30 GB o más. Consulta [[Requisitos del sistema]].
+
+== ¿Puedo instalarlo junto a Windows? ==
+Sí, con particionado manual en el instalador. Haz una copia de seguridad, guarda la clave de BitLocker si la usas y no borres particiones que no reconozcas. Consulta [[Instalar ChurrOS]].
+
+== ¿Funciona con Secure Boot? ==
+ChurrOS no documenta soporte de Secure Boot. Si el equipo lo exige y la ISO no arranca, desactívalo temporalmente.
+
+== ¿Incluye LibreOffice? ==
+No viene preinstalado. Puedes instalarlo con <code>sudo pacman -S libreoffice-fresh</code> o desde Flatpak. Consulta [[Gestionar paquetes]].
+
+== ¿Funciona con tarjetas NVIDIA? ==
+No hay una guía específica de NVIDIA en la documentación del proyecto. Prueba la ISO live y consulta la wiki de Arch Linux para tu modelo. Si la pantalla queda negra, revisa [[Solución de problemas]].
+
+== ¿Hay una edición de 32 bits o ARM? ==
+Las descargas oficiales son x86_64. El proyecto puede construir imágenes para otras arquitecturas desde el código fuente, pero no se publican como descargas oficiales en el sitio.
+
+== ¿Puedo usar la edición Server sin monitor? ==
+Sí, una vez instalada se administra por SSH. Limitación: el instalador es gráfico, así que la instalación inicial necesita una pantalla o una consola con entorno gráfico.
+
+== ¿Cómo actualizo? ==
+<pre>
+sudo pacman -Syu
+</pre>
+
+Después puedes actualizar Flatpak con <code>flatpak update</code> y los paquetes de AUR con <code>yay -Sua</code>. Lee [[Actualizar ChurrOS]].
+
+== ¿Cómo vuelvo atrás si una actualización rompe algo? ==
+En Btrfs, ChurrOS crea snapshots antes de cada transacción de pacman. Puedes restaurar uno desde la ISO live. Consulta [[Rollback con Btrfs]].
+
+== ¿Dónde reporto un error? ==
+En el [https://github.com/ChurrOS-GNU-Linux/ChurrOS/issues repositorio de GitHub] o en el Discord. Incluye la edición, la versión del kernel, los logs y los pasos para reproducirlo. No publiques datos personales ni secretos. Consulta [[Comunidad y soporte]].
+
+== ¿Cómo contribuyo? ==
+Puedes ayudar con documentación, pruebas, traducciones, reportes de errores o código. Consulta [[Contribuir a ChurrOS]].
+
+[[Categoría:Referencia]]
+[[Categoría:Destacados]]

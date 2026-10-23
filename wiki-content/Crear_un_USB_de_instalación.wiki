@@ -1,0 +1,65 @@
+Para instalar ChurrOS necesitas escribir la ISO en un USB. El proceso borra todo el contenido del USB: guarda antes cualquier archivo que quieras conservar.
+
+== Antes de empezar ==
+* Descarga la ISO desde [[Descargar ChurrOS]].
+* Usa un USB de al menos 8 GB.
+* Comprueba el nombre del dispositivo con <code>lsblk</code>. No confundas el USB con el disco del sistema.
+* Cierra cualquier programa que esté usando el USB y desmonta sus particiones.
+
+== Linux con dd ==
+<code>dd</code> escribe la imagen byte a byte. Un destino equivocado destruye datos sin pedir confirmación.
+
+<pre>
+lsblk
+sudo umount /dev/sdX*
+sudo dd if=ChurrOS-2026.10.12-x86_64-Niri-1.3.iso of=/dev/sdX bs=4M status=progress oflag=sync
+sync
+</pre>
+
+Sustituye <code>/dev/sdX</code> por el dispositivo completo del USB, no por una partición como <code>/dev/sdX1</code>. Cuando termine, expulsa el USB de forma segura.
+
+== Linux con Ventoy ==
+[https://www.ventoy.net Ventoy] permite copiar varias ISO al USB y elegir una al arrancar.
+
+1. Instala Ventoy en el USB con la herramienta oficial.
+2. Copia el archivo <code>.iso</code> a la partición de Ventoy.
+3. Arranca desde el USB y selecciona la ISO en el menú.
+
+Ventoy es cómodo para probar varias distribuciones, pero si tienes problemas de arranque, prueba a escribir la ISO directamente con <code>dd</code>.
+
+== Windows con Rufus ==
+1. Abre [https://rufus.ie Rufus] y selecciona el USB.
+2. Selecciona la ISO de ChurrOS.
+3. Elige el esquema de partición según tu equipo:
+   * '''GPT''' si arrancas en UEFI.
+   * '''MBR''' si arrancas en BIOS legacy.
+4. Pulsa '''Empezar''' y confirma el borrado.
+
+Si el USB no arranca, vuelve a escribirlo en modo DD si Rufus lo ofrece.
+
+== Windows o macOS con balenaEtcher ==
+[https://etcher.balena.io balenaEtcher] escribe la ISO sin pedir configuración de particiones. Selecciona la ISO, selecciona el USB y pulsa '''Flash'''.
+
+== Arrancar desde el USB ==
+1. Conecta el USB y enciende el equipo.
+2. Entra en el menú de arranque. La tecla depende del fabricante: suele ser <code>F12</code>, <code>F11</code>, <code>F10</code>, <code>F2</code>, <code>Esc</code> o <code>Del</code>.
+3. Elige el USB en modo UEFI si tu equipo lo soporta; si no, en modo BIOS/Legacy.
+4. En el menú de ChurrOS elige '''ChurrOS Live'''.
+
+El menú también ofrece una entrada de accesibilidad con la tecla <code>s</code>, un test de memoria, la consola UEFI y las opciones de apagado y reinicio.
+
+== Secure Boot ==
+ChurrOS no documenta una cadena de arranque firmada para Secure Boot. Si el equipo tiene Secure Boot activado y el USB no arranca, desactívalo temporalmente en el firmware. Si el equipo es de una empresa o tiene políticas administradas, consulta antes a quien lo administre.
+
+== Si el USB no arranca ==
+* Vuelve a escribir la ISO; una descarga incompleta es la causa más común.
+* Prueba otro puerto USB y otro USB.
+* Revisa el orden de arranque en el firmware.
+* Prueba UEFI y BIOS legacy.
+* Si aparece el menú pero el kernel no arranca, prueba la entrada de accesibilidad o el modo seguro de gráficos desde el menú de GRUB.
+
+== Siguiente paso ==
+* [[Instalar ChurrOS]]
+* [[Solución de problemas]]
+
+[[Categoría:Guías]]

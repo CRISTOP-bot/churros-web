@@ -1,0 +1,76 @@
+El instalador de ChurrOS es '''Calamares''' con branding propio y una cola de pasos de post-instalación. No es todavía un instalador completamente propio, pero sí aplica la configuración de ChurrOS: sesión, tema de GRUB, repositorio temporal y verificación final.
+
+== Antes de instalar ==
+* Haz una copia de seguridad de tus archivos importantes.
+* Conecta el equipo a la red si vas a actualizar después.
+* Comprueba que el equipo arranca desde el USB. Consulta [[Crear un USB de instalación]].
+* Decide si vas a usar todo el disco o una partición libre. Si compartes el disco con otro sistema, usa particionado manual y no borres particiones que no reconozcas.
+* Si el equipo tiene Windows con BitLocker, guarda la clave de recuperación antes de tocar las particiones.
+
+== Arrancar el entorno live ==
+1. Arranca el USB y elige '''ChurrOS Live'''.
+2. Espera a que se cargue el escritorio. En Niri verás la barra de Noctalia y la aplicación de bienvenida; en XFCE verás el panel y el menú Whisker.
+3. Abre el instalador desde la tarjeta '''Install ChurrOS''' de <code>churros-welcome</code> o desde el menú de aplicaciones.
+
+== Recorrido del instalador ==
+Los nombres exactos pueden variar ligeramente según la versión de Calamares. El orden habitual es:
+
+# '''Idioma y teclado''': elige tu idioma y la distribución del teclado.
+# '''Zona horaria''': selecciona tu ciudad.
+# '''Particionado''': usa el disco completo, una partición existente o el particionado manual.
+# '''Usuario''': crea tu cuenta y establece una contraseña. La contraseña de root se reutiliza si así lo indica el instalador.
+# '''Resumen e instalación''': revisa los cambios y confirma.
+
+No apagues el equipo ni cierres la sesión durante la instalación.
+
+== Particionado ==
+La instalación por defecto usa '''Btrfs''' con subvolúmenes para el sistema y el usuario. Ese esquema es el que habilita los snapshots automáticos que se describen en [[Rollback con Btrfs]].
+
+Si eliges otro sistema de archivos, como ext4, el hook de snapshots se ignora sin detener la instalación: seguirás teniendo un sistema funcional, pero sin rollback automático.
+
+El instalador configura el arranque con:
+* '''GRUB''' en UEFI.
+* '''Syslinux''' en BIOS legacy.
+
+En un equipo con varios sistemas operativos, revisa el orden de arranque después de instalar.
+
+== Después de instalar ==
+1. Reinicia y retira el USB cuando el equipo lo indique.
+2. Inicia sesión con el usuario que creaste.
+3. Actualiza el sistema con <code>sudo pacman -Syu</code>.
+4. Revisa el registro de verificación:
+<pre>
+cat /var/log/churros-install-verify.log
+cat /etc/churros-edition
+</pre>
+5. Sigue [[Primeros pasos]].
+
+== Edición Server ==
+La edición Server usa el mismo instalador gráfico, porque Calamares necesita un entorno gráfico para dibujar sus ventanas. Al terminar, <code>configure-server</code> elimina el escritorio y deja el sistema en <code>multi-user.target</code>, con SSH habilitado. Consulta [[Edición Server]] para los pasos posteriores.
+
+Conéctate con:
+<pre>
+ssh usuario@IP_DEL_SERVIDOR
+</pre>
+
+Comprueba el estado de SSH y del cortafuegos:
+<pre>
+systemctl status sshd
+sudo ufw status
+</pre>
+
+Si el puerto 22 no está permitido en <code>ufw</code>, ábrelo explícitamente antes de desconectarte del equipo.
+
+== Si algo falla ==
+* Revisa el registro de instalación y el de verificación.
+* Comprueba que el USB esté bien escrito.
+* Si el sistema no arranca después de instalar, arranca de nuevo la ISO live y revisa las particiones con <code>lsblk</code> y <code>blkid</code>.
+* Consulta [[Solución de problemas]] y [[Comunidad y soporte]].
+
+== Siguiente paso ==
+* [[Primeros pasos]]
+* [[Actualizar ChurrOS]]
+* [[Preguntas frecuentes]]
+
+[[Categoría:Guías]]
+[[Categoría:Destacados]]

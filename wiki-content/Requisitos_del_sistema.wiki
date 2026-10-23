@@ -1,0 +1,72 @@
+ChurrOS no publica una tabla oficial de requisitos mínimos. Esta página reúne recomendaciones prácticas basadas en cómo se construye y se instala la distribución. Si tu equipo está justo de recursos, prueba primero la ISO en modo live.
+
+== Arquitectura ==
+Las imágenes publicadas en la página de descargas son '''x86_64'''. El proyecto puede construir imágenes para otras arquitecturas desde el código fuente, pero esas imágenes no se distribuyen como descargas oficiales en el sitio.
+
+== Recomendaciones prácticas ==
+{| class="wikitable"
+! Componente
+! Recomendación
+|-
+| Procesador
+| x86_64
+|-
+| Memoria RAM
+| 4 GB para el instalador gráfico; más si vas a usar navegador y aplicaciones pesadas
+|-
+| Disco
+| 20 GB como mínimo práctico; 30 GB o más recomendable
+|-
+| USB
+| 8 GB o más
+|-
+| Firmware
+| UEFI o BIOS legacy
+|-
+| Red
+| Conexión a Internet para actualizar después de instalar
+|}
+
+La ISO live carga el sistema en memoria y ejecuta un instalador gráfico. Con menos de 4 GB la instalación puede volverse lenta o fallar, aunque el sistema instalado ocupe bastante menos.
+
+== Tamaño instalado ==
+Los tamaños del sistema recién instalado, sin archivos personales ni programas adicionales, son aproximadamente:
+
+* Server: 1843 MiB.
+* XFCE: 3097 MiB.
+* Niri: 3142 MiB.
+
+A eso hay que sumar actualizaciones, navegador, documentos, juegos y el software que instales. Por eso se recomienda dejar espacio libre adicional.
+
+== Comprobar tu equipo ==
+Desde la ISO live o desde otro Linux:
+
+<pre>
+lscpu
+free -h
+lsblk
+df -h
+</pre>
+
+Comprueba también el firmware:
+
+<pre>
+[ -d /sys/firmware/efi ] && echo "UEFI" || echo "BIOS legacy"
+</pre>
+
+== Secure Boot ==
+ChurrOS no documenta soporte de Secure Boot. Si el firmware lo exige y la ISO no arranca, desactívalo temporalmente. Consulta [[Crear un USB de instalación]].
+
+== Hardware con necesidades especiales ==
+ChurrOS no publica guías específicas para todas las tarjetas gráficas, Wi-Fi o portátiles. Antes de instalar en un equipo con hardware reciente:
+
+* Prueba la ISO live y comprueba que funcionan la red, el audio, el brillo y la suspensión.
+* Consulta la wiki de Arch Linux para el controlador concreto.
+* Pregunta en [[Comunidad y soporte]] indicando el modelo del equipo y la salida de <code>lspci -k</code>.
+
+== Siguiente paso ==
+* [[Descargar ChurrOS]]
+* [[Crear un USB de instalación]]
+* [[Instalar ChurrOS]]
+
+[[Categoría:Referencia]]

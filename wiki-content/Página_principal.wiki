@@ -1,0 +1,33 @@
+__NOTOC__
+'''ChurrOS''' es una distribución GNU/Linux colombiana basada en [https://archlinux.org Arch Linux]. Está pensada para equipos con recursos limitados y se construye con archiso. Incluye los escritorios Niri y XFCE, herramientas propias y un instalador gráfico basado en Calamares.
+
+== Empieza aquí ==
+* [[Primeros pasos]] — lo que conviene hacer después de instalar.
+* [[Descargar ChurrOS]] — ediciones, versiones y enlaces oficiales.
+* [[Crear un USB de instalación]] — escribe la ISO en un USB.
+* [[Instalar ChurrOS]] — recorrido por el instalador.
+* [[Requisitos del sistema]] — qué necesita tu equipo.
+
+== Elige tu escritorio ==
+* [[Escritorio Niri]] — Wayland, mosaicos dinámicos y atajos de teclado.
+* [[Escritorio XFCE]] — escritorio tradicional, ligero y familiar.
+* [[Ediciones de ChurrOS]] — diferencias entre Niri, XFCE y Server.
+* [[Edición Server]] — servidores sin escritorio, administrados por SSH.
+* [[Aplicaciones de ChurrOS]] — las apps propias y las herramientas incluidas.
+
+== Mantén el sistema al día ==
+* [[Actualizar ChurrOS]] — actualizaciones completas con pacman.
+* [[Gestionar paquetes]] — instala, busca y elimina software.
+* [[Rollback con Btrfs]] — vuelve atrás si una actualización falla.
+* [[Red y conectividad]] — Wi-Fi, Ethernet y Bluetooth.
+
+== ¿Necesitas ayuda? ==
+* [[Solución de problemas]] — fallos comunes y cómo diagnosticarlos.
+* [[Preguntas frecuentes]] — dudas rápidas.
+* [[Comunidad y soporte]] — Discord, GitHub y canales oficiales.
+* [[Contribuir a ChurrOS]] — documentación, pruebas y código.
+
+== Estado del proyecto ==
+ChurrOS es un proyecto independiente y comunitario. La versión más reciente publicada es la '''1.3''' (12 de octubre de 2026). Consulta el [[Historial de versiones]] para ver las ediciones anteriores.
+
+[[Categoría:Destacados]]

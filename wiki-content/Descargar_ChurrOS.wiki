@@ -1,0 +1,46 @@
+Las imágenes oficiales se publican en [https://download.churroslinux.org download.churroslinux.org]. La página de descarga del sitio muestra siempre la versión más reciente:
+
+* [https://www.churroslinux.org/download.html Página oficial de descargas]
+
+== Versión actual: 1.3 ==
+La versión '''1.3''' se publicó el '''12 de octubre de 2026'''.
+
+=== Niri Edition ===
+La edición predeterminada, con Niri sobre Wayland.
+
+[https://download.churroslinux.org/ChurrOS-2026.10.12-x86_64-Niri-1.3.iso Descargar ChurrOS 1.3 Niri (ISO)]
+
+=== XFCE Edition ===
+La edición con escritorio tradicional XFCE sobre X11.
+
+[https://download.churroslinux.org/ChurrOS-2026.10.12-x86_64-Xfce-1,3.iso Descargar ChurrOS 1.3 XFCE (ISO)]
+
+=== Server Edition ===
+La edición Server se construye desde el código fuente con <code>./churros build --edition server</code> y no aparece como descarga directa en la página principal. Instala un sistema sin escritorio, accesible por SSH. Consulta [[Ediciones de ChurrOS]] y [[Edición Server]].
+
+== Antes de descargar ==
+* Lee [[Requisitos del sistema]].
+* Comprueba que tu equipo puede arrancar en UEFI o en BIOS legacy. La ISO incluye GRUB para UEFI y Syslinux para BIOS.
+* Ten a mano un USB de al menos 8 GB. La escritura borra todo su contenido.
+* Si vas a instalar en un equipo con Secure Boot activado, revisa la nota de [[Crear un USB de instalación]]. ChurrOS no documenta una cadena de arranque firmada para Secure Boot.
+
+== Verifica la descarga ==
+Descarga siempre desde el dominio oficial. Si la descarga se interrumpe, vuelve a empezar: una ISO incompleta no arranca o falla durante la instalación.
+
+Puedes comprobar la integridad de la imagen arrancándola en modo live antes de instalar. Si el proyecto publica un archivo de sumas junto a la ISO, verifícalo con:
+
+<pre>
+sha256sum ChurrOS-2026.10.12-x86_64-Niri-1.3.iso
+</pre>
+
+Compara el resultado con la suma publicada. No instales desde una imagen que no coincida.
+
+== Versiones anteriores ==
+Las versiones anteriores se conservan en el servidor de descargas. Consulta [[Historial de versiones]] para ver fechas y ediciones.
+
+== Siguiente paso ==
+* [[Crear un USB de instalación]]
+* [[Instalar ChurrOS]]
+
+[[Categoría:Referencia]]
+[[Categoría:Destacados]]

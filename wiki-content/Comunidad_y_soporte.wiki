@@ -1,0 +1,39 @@
+ChurrOS es un proyecto comunitario. Estos son los canales oficiales para hacer preguntas, reportar errores y seguir el desarrollo.
+
+== Canales ==
+* [https://discord.gg/4nAJbbzvd Discord de ChurrOS] — preguntas, ayuda y conversación.
+* [https://github.com/ChurrOS-GNU-Linux/ChurrOS Repositorio en GitHub] — código, documentación y seguimiento de errores.
+* [https://github.com/ChurrOS-GNU-Linux/ChurrOS/issues Issues] — errores y solicitudes concretas.
+* [https://www.churroslinux.org Sitio oficial] — descargas, blog y novedades.
+* [https://distrowatch.com/table.php?distribution=churros Ficha en DistroWatch] — popularidad y visitas reportadas.
+
+== Antes de preguntar ==
+1. Busca en esta wiki, especialmente en [[Preguntas frecuentes]] y [[Solución de problemas]].
+2. Comprueba que estás usando la última versión publicada.
+3. Revisa los logs y anota los pasos exactos que provocaron el problema.
+4. Si el problema es de un paquete oficial de Arch, consulta también la wiki de Arch Linux.
+
+== Cómo reportar un error ==
+Incluye:
+* Edición: <code>cat /etc/churros-edition</code>.
+* Versión del kernel: <code>uname -r</code>.
+* Resumen del sistema: <code>fastfetch</code>.
+* Hardware relevante: <code>lspci -k</code> y, si es de red, <code>nmcli device status</code>.
+* Logs: <code>journalctl -b -p err</code>.
+* Qué esperabas que ocurriera y qué ocurrió.
+* Si es reproducible, los pasos para reproducirlo.
+
+No publiques contraseñas, claves SSH, tokens de OAuth, direcciones privadas ni datos personales. Si el problema es de seguridad, no abras un issue público: sigue el procedimiento de [https://github.com/ChurrOS-GNU-Linux/ChurrOS/blob/main/SECURITY.md SECURITY.md].
+
+== Normas ==
+La comunidad se rige por el [https://github.com/ChurrOS-GNU-Linux/ChurrOS/blob/main/CODE_OF_CONDUCT.md código de conducta]. Trata a los demás con respeto, evita el spam y no des soporte destructivo, como pedir a alguien que borre particiones sin comprobar antes qué disco es.
+
+== Apoyar el proyecto ==
+ChurrOS es independiente. Puedes apoyar la infraestructura y el desarrollo en [https://ko-fi.com/hoyuse Ko-fi]. También puedes ayudar sin dinero: prueba la ISO, reporta errores, mejora la documentación o contribuye código. Consulta [[Contribuir a ChurrOS]].
+
+== Siguiente paso ==
+* [[Contribuir a ChurrOS]]
+* [[Preguntas frecuentes]]
+
+[[Categoría:Comunidad]]
+[[Categoría:Destacados]]

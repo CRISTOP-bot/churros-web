@@ -1,0 +1,112 @@
+Esta página reúne los fallos más comunes y cómo diagnosticarlos. Antes de cambiar configuración, anota qué hiciste y guarda una copia del archivo que vas a editar.
+
+== El USB no arranca ==
+* Vuelve a escribir la ISO; una descarga incompleta es la causa más habitual.
+* Prueba otro puerto y otro USB.
+* Comprueba el orden de arranque en el firmware.
+* Prueba UEFI y BIOS legacy.
+* Si Secure Boot está activo y la ISO no arranca, desactívalo temporalmente.
+* Consulta [[Crear un USB de instalación]].
+
+== El sistema no arranca después de instalar ==
+* Arranca la ISO live y revisa las particiones:
+<pre>
+lsblk -f
+blkid
+</pre>
+* Comprueba que la partición EFI esté marcada como tal y que GRUB esté instalado.
+* Si el equipo arranca directamente en Windows, entra en el firmware y selecciona el gestor de arranque de ChurrOS.
+* Si aparece GRUB pero el kernel no arranca, intenta arrancar con un kernel anterior desde el menú de GRUB.
+
+== Pantalla negra o gráficos defectuosos ==
+Prueba primero con la ISO live para descartar hardware. Si el sistema instalado arranca pero la pantalla queda negra, puedes probar temporalmente el parámetro <code>nomodeset</code>:
+
+# En el menú de GRUB, pulsa <code>e</code> sobre la entrada de ChurrOS.
+# Añade <code>nomodeset</code> al final de la línea que empieza por <code>linux</code>.
+# Arranca con <code>Ctrl + X</code> o <code>F10</code>.
+
+Es un diagnóstico temporal, no una solución permanente. Revisa el controlador de tu tarjeta gráfica y los logs antes de dejarlo configurado.
+
+== La red no funciona ==
+<pre>
+nmcli device status
+nmcli device wifi list
+ping -c 3 archlinux.org
+journalctl -u NetworkManager -b
+lspci -k
+</pre>
+
+* Si el Wi-Fi no aparece, revisa <code>rfkill list</code> y el controlador en <code>lspci -k</code>.
+* Si <code>ping</code> a una IP funciona pero los nombres no, el problema es DNS. Revisa <code>resolvectl status</code>.
+* Consulta [[Red y conectividad]].
+
+== No hay audio ==
+<pre>
+wpctl status
+systemctl --user status pipewire wireplumber
+alsamixer
+</pre>
+
+Comprueba que el dispositivo de salida correcto esté seleccionado y que no esté silenciado. La edición Server no incluye audio por diseño.
+
+== Error de firma al actualizar ==
+Actualiza el llavero de Arch Linux (<code>archlinux-keyring</code>) siguiendo la guía oficial y vuelve a ejecutar:
+
+<pre>
+sudo pacman -Syu
+</pre>
+
+No dejes la actualización a medias. Si el problema persiste, revisa la fecha del sistema y el mirror.
+
+== El disco está lleno ==
+<pre>
+df -h
+sudo du -xhd1 / | sort -h
+pacman -Qtdq
+sudo churros-snapshot list
+</pre>
+
+* Los paquetes huérfanos se pueden revisar con <code>pacman -Qtdq</code>; elimínalos con cuidado.
+* La caché de pacman se limpia con <code>sudo pacman -Sc</code>.
+* Los snapshots antiguos se pueden borrar con <code>sudo churros-snapshot cleanup</code>.
+* Los Flatpak ocupan espacio aparte: <code>flatpak list</code> y <code>flatpak uninstall --unused</code>.
+
+== Niri o Noctalia no responden ==
+<pre>
+journalctl --user -b
+cat ~/.cache/noctalia/noctalia.log
+</pre>
+
+Si la barra desaparece, comprueba que Noctalia esté en <code>spawn-at-startup</code>. Si el problema empezó después de editar <code>~/.config/niri/config.kdl</code>, restaura la copia de seguridad y vuelve a iniciar sesión.
+
+== XFCE no arranca o el panel desaparece ==
+Cierra sesión y vuelve a entrar. Si persiste, revisa la configuración en <code>~/.config/xfce4/</code> y prueba a crear un usuario nuevo para comprobar si el problema está en el perfil.
+
+== Recuperar el sistema desde la ISO live ==
+Si el sistema no arranca, puedes entrar en la instalación y repararla. Ajusta los nombres de las particiones según <code>lsblk -f</code>:
+
+<pre>
+sudo mount -o subvol=@ /dev/nvme0n1p2 /mnt
+sudo mount /dev/nvme0n1p1 /mnt/boot
+sudo arch-chroot /mnt
+</pre>
+
+Dentro del chroot puedes revisar logs, reinstalar GRUB, actualizar el llavero o cambiar una contraseña. Antes de ejecutar comandos destructivos, comprueba dos veces qué disco estás montando.
+
+== Cómo pedir ayuda ==
+Incluye esta información en tu mensaje:
+* Edición instalada: <code>cat /etc/churros-edition</code>.
+* Versión del kernel: <code>uname -r</code>.
+* Resumen del sistema: <code>fastfetch</code>.
+* Hardware relevante: <code>lspci -k</code>.
+* Logs: <code>journalctl -b -p err</code>.
+* Qué intentaste y qué esperabas que ocurriera.
+
+No publiques contraseñas, claves SSH, tokens ni datos personales. Consulta [[Comunidad y soporte]].
+
+== Siguiente paso ==
+* [[Preguntas frecuentes]]
+* [[Comunidad y soporte]]
+
+[[Categoría:Guías]]
+[[Categoría:Destacados]]
