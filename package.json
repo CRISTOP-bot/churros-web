@@ -1,0 +1,15 @@
+{
+  "name": "churros-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test",
+    "check": "node --check server/index.js && node --check server/app.js && node --check server/wiki-service.js && node --check js/app.js && node --check js/wiki.js && node --check js/wiki-core.js",
+    "check:config": "node --env-file=.env.example server/check-config.js"
+  }
+}

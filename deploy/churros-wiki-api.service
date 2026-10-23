@@ -1,0 +1,33 @@
+[Unit]
+Description=ChurrOS MediaWiki integration API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=churros-wiki
+Group=http
+WorkingDirectory=/srv/http/churros-web
+EnvironmentFile=/etc/churros/wiki-api.env
+ExecStart=/usr/bin/node /srv/http/churros-web/server/index.js
+Restart=on-failure
+RestartSec=3s
+TimeoutStopSec=15s
+UMask=0027
+
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

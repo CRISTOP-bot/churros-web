@@ -1,0 +1,74 @@
+<?php
+
+# ChurrOS MediaWiki 1.46.x production example for Arch Linux.
+# Copy to /usr/share/webapps/mediawiki/LocalSettings.php and keep the secrets
+# file below readable only by root and the `http` group.
+
+if ( !file_exists( '/etc/webapps/mediawiki/churros-secrets.php' ) ) {
+    throw new RuntimeException( 'Missing MediaWiki secrets file.' );
+}
+require '/etc/webapps/mediawiki/churros-secrets.php';
+
+$wgSitename = 'Wiki ChurrOS';
+$wgMetaNamespace = 'Wiki_ChurrOS';
+$wgLanguageCode = 'es';
+$wgServer = 'https://www.churroslinux.org';
+$wgCanonicalServer = $wgServer;
+$wgScriptPath = '/wiki-engine';
+$wgArticlePath = '/wiki-engine/index.php?title=$1';
+$wgResourceBasePath = $wgScriptPath;
+
+$wgDBtype = 'mysql';
+$wgDBserver = 'localhost';
+$wgDBname = $churrosDbName;
+$wgDBuser = $churrosDbUser;
+$wgDBpassword = $churrosDbPassword;
+$wgDBprefix = '';
+
+$wgSecretKey = $churrosSecretKey;
+$wgUpgradeKey = $churrosUpgradeKey;
+
+$wgEnableUploads = true;
+$wgUploadDirectory = '/var/lib/mediawiki/uploads';
+$wgUploadPath = '/wiki-assets';
+$wgUseImageMagick = true;
+$wgImageMagickConvertCommand = '/usr/bin/convert';
+$wgFileExtensions = [ 'png', 'gif', 'jpg', 'jpeg', 'webp', 'svg', 'pdf' ];
+$wgAllowExternalImages = false;
+
+# Public reading; authenticated editing. Account creation stays an explicit
+# administrative operation rather than an open Internet endpoint.
+$wgGroupPermissions['*']['read'] = true;
+$wgGroupPermissions['*']['edit'] = false;
+$wgGroupPermissions['*']['createpage'] = false;
+$wgGroupPermissions['*']['createtalk'] = false;
+$wgGroupPermissions['*']['createaccount'] = false;
+$wgGroupPermissions['user']['edit'] = true;
+$wgGroupPermissions['user']['createpage'] = true;
+$wgGroupPermissions['user']['createtalk'] = true;
+$wgGroupPermissions['sysop']['mwoauthproposeconsumer'] = true;
+$wgGroupPermissions['sysop']['mwoauthupdateownconsumer'] = true;
+$wgGroupPermissions['sysop']['mwoauthmanageconsumer'] = true;
+
+$wgCookieSecure = true;
+$wgCookieHttpOnly = true;
+$wgCookieSameSite = 'Lax';
+$wgForceHTTPS = true;
+$wgEnableApi = true;
+$wgEnableWriteAPI = true;
+$wgCrossSiteAJAXdomains = [];
+$wgRateLimits['edit']['user'] = [ 8, 60 ];
+$wgRateLimits['create']['user'] = [ 4, 60 ];
+
+$wgMainCacheType = CACHE_ACCEL;
+$wgParserCacheType = CACHE_ACCEL;
+$wgCacheDirectory = '/var/cache/mediawiki';
+
+wfLoadSkin( 'Vector' );
+wfLoadExtension( 'OAuth' );
+
+$wgOAuth2PrivateKey = '/etc/webapps/mediawiki/oauth-private.key';
+$wgOAuth2PublicKey = '/etc/webapps/mediawiki/oauth-public.key';
+$wgOAuth2GrantExpirationInterval = 'PT1H';
+$wgOAuth2RefreshTokenTTL = 'P1M';
+$wgOAuth2EnabledGrantTypes = [ 'authorization_code', 'refresh_token' ];
