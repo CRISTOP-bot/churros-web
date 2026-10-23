@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node server/index.js",
     "test": "node --test",
-    "check": "node --check server/index.js && node --check js/app.js && node --check js/wiki.js && node --check js/wiki-core.js"
+    "check": "node --check server/index.js && node --check server/app.js && node --check server/wiki-service.js && node --check js/app.js && node --check js/wiki.js && node --check js/wiki-core.js",
+    "check:config": "node --env-file=.env.example server/check-config.js"
   }
 }
