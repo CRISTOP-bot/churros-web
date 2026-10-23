@@ -340,12 +340,89 @@
     const status = section?.querySelector("[data-dw-status]");
     if (!section || !chart || !periodControls || !chartNote || !status) return;
 
+    const LIVE_ENDPOINT = "api/distrowatch";
     let activePeriod = "30";
     let history = [];
 
     function setMetric(name, value) {
       const element = section.querySelector(`[data-dw-value="${name}"]`);
       if (element) element.textContent = value;
+    }
+
+    function setStatus(label, state) {
+      const textNode = Array.from(status.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+      if (textNode) {
+        textNode.textContent = ` ${label}`;
+      } else {
+        status.append(` ${label}`);
+      }
+      status.classList.toggle("is-live", state === "live");
+      status.classList.toggle("is-error", state === "error");
+      setMetric("source-state", state === "live" ? "En vivo" : state === "error" ? "No disponible" : "Registro local");
+    }
+
+    function isHistoryEntry(entry) {
+      return Boolean(
+        entry &&
+          /^\d{4}-\d{2}-\d{2}$/.test(entry.date) &&
+          /^\d{4}-\d{2}-\d{2}$/.test(entry.listingUpdatedAt) &&
+          Number.isInteger(entry.popularityRank) &&
+          entry.popularityRank > 0 &&
+          Number.isInteger(entry.pageHitsPerDay) &&
+          entry.pageHitsPerDay >= 0,
+      );
+    }
+
+    function isLiveSnapshot(data) {
+      return Boolean(
+        data &&
+          typeof data.fetchedAt === "string" &&
+          /^\d{4}-\d{2}-\d{2}/.test(data.fetchedAt) &&
+          Number.isInteger(data.popularityRank) &&
+          data.popularityRank > 0 &&
+          Number.isInteger(data.pageHitsPerDay) &&
+          data.pageHitsPerDay >= 0 &&
+          (data.listingUpdatedAt === null || /^\d{4}-\d{2}-\d{2}$/.test(data.listingUpdatedAt)),
+      );
+    }
+
+    function toHistoryEntry(data) {
+      const date = data.fetchedAt.slice(0, 10);
+      return {
+        date,
+        listingUpdatedAt: data.listingUpdatedAt || date,
+        popularityRank: data.popularityRank,
+        pageHitsPerDay: data.pageHitsPerDay,
+      };
+    }
+
+    function mergeEntry(entry) {
+      const index = history.findIndex((item) => item.date === entry.date);
+      if (index === -1) {
+        history.push(entry);
+      } else {
+        history[index] = entry;
+      }
+      history.sort((left, right) => left.date.localeCompare(right.date));
+    }
+
+    function applyLatestMetrics() {
+      if (!history.length) return;
+      const latest = history[history.length - 1];
+      setMetric("rank", `#${latest.popularityRank}`);
+      setMetric("page-hits", latest.pageHitsPerDay.toLocaleString("es-CO"));
+      setMetric("updated", new Date(`${latest.date}T00:00:00Z`).toLocaleDateString("es-CO", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+      }));
+      setMetric("listing", new Date(`${latest.listingUpdatedAt}T00:00:00Z`).toLocaleDateString("es-CO", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+      }));
     }
 
     function renderChart(period) {
@@ -428,8 +505,8 @@
 
       const periodLabel = period === "365" ? "12 meses" : `${period} días`;
       chartNote.textContent = entries.length
-        ? `${entries.length} ${entries.length === 1 ? "captura verificada" : "capturas verificadas"} en los últimos ${periodLabel}`
-        : `Sin capturas verificadas en los últimos ${periodLabel}`;
+        ? `${entries.length} ${entries.length === 1 ? "captura" : "capturas"} en los últimos ${periodLabel}`
+        : `Sin capturas en los últimos ${periodLabel}`;
     }
 
     periodControls.addEventListener("click", (event) => {
@@ -441,53 +518,73 @@
       renderChart(button.dataset.period);
     });
 
-    fetch("data/distrowatch.json", { cache: "no-store" })
-      .then((response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
-      })
-      .then((data) => {
-        if (
-          !data ||
-          !Array.isArray(data.history) ||
-          !data.history.length ||
-          !data.history.every((entry) =>
-            /^\d{4}-\d{2}-\d{2}$/.test(entry.date) &&
-            /^\d{4}-\d{2}-\d{2}$/.test(entry.listingUpdatedAt) &&
-            Number.isInteger(entry.popularityRank) &&
-            entry.popularityRank > 0 &&
-            Number.isInteger(entry.pageHitsPerDay) &&
-            entry.pageHitsPerDay >= 0,
-          )
-        ) {
-          throw new Error("Formato de datos inválido");
+    function loadLocalHistory() {
+      return fetch("data/distrowatch.json", { cache: "no-store" })
+        .then((response) => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })
+        .then((data) => {
+          if (!data || !Array.isArray(data.history) || !data.history.length) {
+            throw new Error("Formato de datos inválido");
+          }
+
+          const validEntries = data.history.filter(isHistoryEntry);
+          if (!validEntries.length) {
+            throw new Error("Formato de datos inválido");
+          }
+
+          history = validEntries.sort((left, right) => left.date.localeCompare(right.date));
+          applyLatestMetrics();
+          renderChart(activePeriod);
+          return true;
+        })
+        .catch((error) => {
+          console.warn("No se pudo cargar el historial local de DistroWatch:", error);
+          return false;
+        });
+    }
+
+    function loadLiveStats() {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+
+      return fetch(LIVE_ENDPOINT, { cache: "no-store", signal: controller.signal })
+        .then((response) => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })
+        .then((data) => {
+          if (!isLiveSnapshot(data)) {
+            throw new Error("Formato de datos en vivo inválido");
+          }
+
+          mergeEntry(toHistoryEntry(data));
+          applyLatestMetrics();
+          renderChart(activePeriod);
+          setStatus("Datos en vivo · DistroWatch", "live");
+          return true;
+        })
+        .catch((error) => {
+          console.warn("No se pudieron obtener las estadísticas en vivo de DistroWatch:", error);
+          return false;
+        })
+        .finally(() => clearTimeout(timeout));
+    }
+
+    loadLocalHistory().then((localLoaded) => {
+      loadLiveStats().then((liveLoaded) => {
+        if (liveLoaded) return;
+
+        if (localLoaded) {
+          setStatus("Datos verificados · registro local", "idle");
+          return;
         }
 
-        history = [...data.history].sort((left, right) => left.date.localeCompare(right.date));
-        const latest = history[history.length - 1];
-        setMetric("rank", `#${latest.popularityRank}`);
-        setMetric("page-hits", latest.pageHitsPerDay.toLocaleString("es-CO"));
-        setMetric("updated", new Date(`${latest.date}T00:00:00Z`).toLocaleDateString("es-CO", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-          timeZone: "UTC",
-        }));
-        setMetric("listing", new Date(`${latest.listingUpdatedAt}T00:00:00Z`).toLocaleDateString("es-CO", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-          timeZone: "UTC",
-        }));
-        chartNote.textContent = "Datos verificados · actualizando gráfico…";
-        renderChart(activePeriod);
-      })
-      .catch((error) => {
-        console.error("No se pudieron cargar las estadísticas de DistroWatch:", error);
-        status.lastChild.textContent = " Datos no disponibles";
-        status.classList.add("is-error");
-        chartNote.textContent = "No se pudieron cargar los datos. Comprueba el archivo data/distrowatch.json.";
+        setStatus("Datos no disponibles", "error");
+        chartNote.textContent = "No se pudieron cargar los datos de DistroWatch. Inténtalo de nuevo más tarde.";
       });
+    });
 
     window.addEventListener("resize", () => {
       if (history.length) renderChart(activePeriod);

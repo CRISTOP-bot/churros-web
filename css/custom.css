@@ -469,6 +469,23 @@ html.theme-transition *::after {
   background: rgba(127, 29, 29, 0.22);
 }
 
+.distrowatch-status.is-live {
+  color: #166534;
+  border-color: rgba(22, 101, 52, 0.25);
+  background: rgba(220, 252, 231, 0.8);
+}
+
+.distrowatch-status.is-live span {
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.16);
+}
+
+.dark .distrowatch-status.is-live {
+  color: #bbf7d0;
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(20, 83, 45, 0.28);
+}
+
 .distrowatch-intro {
   max-width: 46rem;
   margin: 1.25rem 0 2rem;

@@ -1,39 +1,64 @@
-# Integracion de estadisticas de DistroWatch
+# Integracion dinamica de estadisticas de DistroWatch
 
-La seccion `#distrowatch` carga datos desde `data/distrowatch.json`. DistroWatch no proporciono una API publica estable en la ficha consultada, por lo que la integracion usa capturas manuales verificables en vez de scraping automatico del HTML.
+La seccion `#distrowatch` ya no depende de valores escritos a mano. En produccion consulta la ficha de DistroWatch en el servidor y muestra el ranking y las visitas diarias actuales. Si la consulta falla, usa `data/distrowatch.json` como respaldo.
 
 Ficha consultada: <https://distrowatch.com/table.php?distribution=churros>
 
-## Captura registrada
+## Como funciona
 
-Consulta realizada el 2026-09-29. La ficha de ChurrOS mostro Popularidad 520 (6 visitas diarias) y una ultima actualizacion de la ficha el 2026-09-25.
+1. `lib/distrowatch.js` descarga la ficha y extrae:
+   - `Popularity: N (M hits per day)`.
+   - `Last Update: AAAA-MM-DD HH:MM UTC`.
+   - Las metricas por periodo (12 meses, 6 meses, 3 meses, 4 semanas, 1 semana).
+   - La valoracion media de los visitantes.
+   Si la descarga directa falla, reintenta con el lector publico `r.jina.ai` y parsea el mismo contenido en texto plano.
+2. `api/distrowatch.js` expone esos datos como JSON en `GET /api/distrowatch`. La respuesta se cachea 15 minutos en el CDN de Vercel y la funcion tiene un limite de 20 segundos.
+3. `js/app.js` carga el historial local y luego consulta `/api/distrowatch`. Si la respuesta es valida, actualiza las metricas, agrega la captura del dia al grafico y muestra el estado `Datos en vivo`.
+4. Si `/api/distrowatch` no esta disponible (por ejemplo con Live Server en local), la seccion sigue mostrando el historial de `data/distrowatch.json`.
 
-- `popularityRank`: numero de popularidad mostrado por DistroWatch; no representa descargas ni instalaciones.
-- `pageHitsPerDay`: visitas diarias reportadas por DistroWatch; no representa descargas ni usuarios unicos.
-- `date`: fecha en que se consultaron y registraron los valores.
-- `listingUpdatedAt`: fecha de ultima actualizacion indicada dentro de la ficha de DistroWatch.
+No se necesita ninguna dependencia de Node: el parser usa expresiones regulares sobre el HTML de DistroWatch.
 
-## Actualizar el registro
+## Historial automatico
 
-1. Abre la ficha de ChurrOS y localiza el valor `Popularidad: N (M Visitas diarias)` y `Ultima actualizacion: AAAA-MM-DD`.
-2. Agrega un objeto al final de `history` en `data/distrowatch.json`.
-3. Pon en `date` la fecha de consulta, no la fecha de ultima actualizacion de la ficha. Copia esa ultima fecha en `listingUpdatedAt`.
-4. Registra los valores numericos tal como aparecen y conserva las capturas anteriores para que el grafico tenga historial.
-5. Verifica la pagina por HTTP/HTTPS despues de publicar. El navegador solicita el JSON del mismo origen; al abrir `index.html` directamente como `file://`, el navegador puede bloquear `fetch`.
+`.github/workflows/distrowatch.yml` ejecuta `scripts/update-distrowatch.js` todos los dias a las 06:17 UTC (o manualmente desde la pestana Actions). El script:
 
-Ejemplo de una nueva entrada (reemplaza los valores con los que muestra la ficha en esa consulta):
+- Consulta DistroWatch.
+- Inserta o reemplaza la captura del dia en `data/distrowatch.json`.
+- Hace commit solo si cambio el ranking, las visitas o la fecha de la ficha.
+
+Ese commit dispara el despliegue de Vercel y mantiene el grafico con historial persistente. Tambien puedes ejecutarlo en local:
+
+```bash
+node scripts/update-distrowatch.js
+```
+
+## Contrato de `data/distrowatch.json`
 
 ```json
 {
-  "date": "AAAA-MM-DD",
-  "listingUpdatedAt": "AAAA-MM-DD",
-  "popularityRank": 520,
-  "pageHitsPerDay": 6
+  "sourceUrl": "https://distrowatch.com/table.php?distribution=churros",
+  "history": [
+    {
+      "date": "AAAA-MM-DD",
+      "listingUpdatedAt": "AAAA-MM-DD",
+      "popularityRank": 410,
+      "pageHitsPerDay": 31
+    }
+  ]
 }
 ```
 
-## Contrato del archivo
+- `date`: fecha UTC de la captura.
+- `listingUpdatedAt`: fecha de ultima actualizacion indicada en la ficha de DistroWatch.
+- `popularityRank`: ranking de popularidad; no representa descargas ni instalaciones.
+- `pageHitsPerDay`: visitas diarias reportadas; no representa descargas ni usuarios unicos.
 
-`data/distrowatch.json` contiene `sourceUrl` y `history`, una lista de capturas ordenadas cronologicamente. Cada entrada requiere los cuatro campos del ejemplo. No agregues estimaciones ni interpolaciones: si solo existe una captura en el periodo elegido, el grafico dibuja una sola barra y lo indica como tal.
+`history` debe estar ordenado cronologicamente. El navegador valida fechas e enteros antes de graficar. Si no hay datos locales ni respuesta del API, las metricas quedan en `--` y la seccion muestra `Datos no disponibles`.
 
-El JavaScript valida el formato y los enteros antes de mostrar los valores. Si el archivo falta o no es valido, las metricas permanecen como `--` y la seccion informa que no pudo cargarlo. La serie se filtra por los periodos de 30, 90 y 365 dias.
+## Prueba local
+
+El endpoint `/api` solo existe cuando el sitio corre en Vercel o con `vercel dev`. Con Live Server u otro servidor estatico, la web cae automaticamente al JSON local. Para probar el parser sin desplegar:
+
+```bash
+node -e "require('./lib/distrowatch').fetchDistroWatch().then(console.log)"
+```
