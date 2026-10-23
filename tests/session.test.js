@@ -39,8 +39,11 @@ test("sealed sessions round-trip and reject tampering", () => {
   const sealed = codec.seal({ accessToken: "private", user: { name: "Lina" } });
 
   assert.deepEqual(codec.open(sealed), { accessToken: "private", user: { name: "Lina" } });
-  const replacement = sealed.endsWith("a") ? "b" : "a";
-  assert.equal(codec.open(sealed.slice(0, -1) + replacement), null);
+  const parts = sealed.split(".");
+  const ciphertext = Buffer.from(parts[2], "base64url");
+  ciphertext[0] ^= 1;
+  parts[2] = ciphertext.toString("base64url");
+  assert.equal(codec.open(parts.join(".")), null);
 });
 
 test("expired sessions fail closed", () => {
