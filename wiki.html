@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es" class="2xl:text-xl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <script>
+      (function () {
+        var theme = localStorage.theme;
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (theme === "dark" || (!theme && prefersDark)) document.documentElement.classList.add("dark");
+      })();
+    </script>
+    <meta name="darkreader-lock" content="" />
+    <title>Wiki — ChurrOS</title>
+    <meta name="description" content="Documentación comunitaria, guías y soluciones para ChurrOS." />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.churroslinux.org/wiki.html" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f0802" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="stylesheet" href="css/tailwind.css" />
+    <link rel="stylesheet" href="css/custom.css" />
+    <link rel="stylesheet" href="css/wiki.css" />
+  </head>
+  <body class="antialiased text-gray-900 dark:text-gray-200 tracking-tight bg-white dark:bg-gray-950">
+    <header class="sticky top-0 z-40 flex-none mx-auto transition-colors w-full duration-500" id="header">
+      <div class="py-3 px-3 mx-auto w-full md:justify-between max-w-7xl md:px-6">
+        <div class="md:flex md:items-center md:justify-between text-gray-700 font-semibold text-sm leading-6 dark:text-gray-200">
+          <a class="hidden md:flex md:items-center" href="/">
+            <img class="self-center" src="img/logo.churros.png" alt="ChurrOS" width="32" height="32" />
+            <span class="self-center ml-2 text-xl font-bold text-gray-700 whitespace-nowrap dark:text-white">ChurrOS</span>
+          </a>
+          <div class="flex justify-between md:hidden">
+            <a class="flex items-center" href="/">
+              <img class="self-center" src="img/logo.churros.png" alt="ChurrOS" width="32" height="32" />
+              <span class="self-center ml-2 text-2xl font-bold dark:text-white">ChurrOS</span>
+            </a>
+            <div class="flex items-center">
+              <button type="button" class="wiki-icon-button" aria-label="Cambiar tema" data-aw-toggle-color-scheme>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4m0-12.8L17 7M7 17l-1.4 1.4M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0Z"/></svg>
+              </button>
+              <button type="button" class="wiki-icon-button" aria-label="Abrir menú" aria-expanded="false" aria-controls="main-navigation" data-aw-toggle-menu>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
+              </button>
+            </div>
+          </div>
+          <nav class="items-center w-full md:w-auto md:flex h-[calc(100vh-100px)] md:h-auto overflow-y-auto md:overflow-visible hidden" id="main-navigation" aria-label="Navegación principal">
+            <ul class="flex flex-col pt-8 md:pt-0 md:flex-row md:self-center w-full md:w-auto text-xl md:text-base md:gap-x-8">
+              <li><a class="wiki-header-link" href="download.html">Descargar</a></li>
+              <li><a class="wiki-header-link" href="about.html">Acerca de</a></li>
+              <li><a class="wiki-header-link" href="blog.html">Blog</a></li>
+              <li><a class="wiki-header-link is-current" href="wiki.html" aria-current="page">Wiki</a></li>
+              <li><a class="wiki-header-link" href="/#faq">FAQ</a></li>
+            </ul>
+            <div class="hidden md:flex items-center ml-5">
+              <button type="button" class="wiki-icon-button" aria-label="Cambiar tema" data-aw-toggle-color-scheme>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4m0-12.8L17 7M7 17l-1.4 1.4M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0Z"/></svg>
+              </button>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="wiki-page">
+      <section class="wiki-masthead" aria-labelledby="wiki-title">
+        <div class="wiki-masthead-copy">
+          <a class="wiki-wordmark" href="wiki.html" data-wiki-nav>Wiki ChurrOS</a>
+          <h1 id="wiki-title">Encuentra la respuesta. Mejora la guía.</h1>
+          <p>Documentación comunitaria sobre instalación, uso y solución de problemas.</p>
+        </div>
+        <form class="wiki-search" id="wiki-search" role="search">
+          <label for="wiki-search-input">Buscar en la wiki</label>
+          <div class="wiki-search-control">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="wiki-search-input" name="q" type="search" minlength="2" maxlength="200" autocomplete="off" enterkeyhint="search" placeholder="Ej. instalar ChurrOS, Wi-Fi, Niri…" />
+            <button type="submit">Buscar</button>
+          </div>
+        </form>
+      </section>
+
+      <div class="wiki-layout">
+        <aside class="wiki-rail" aria-label="Secciones de la wiki">
+          <nav>
+            <a href="wiki.html" data-wiki-nav data-view="home"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9H5v-9Z"/><path d="M9 20v-6h6v6"/></svg>Inicio</a>
+            <a href="wiki.html?view=recent" data-wiki-nav data-view="recent"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>Recientes</a>
+            <button type="button" id="wiki-categories-button"><svg viewBox="0 0 24 24"><path d="M4 5h6l2 2h8v12H4Z"/></svg>Categorías</button>
+          </nav>
+          <div class="wiki-session" id="wiki-session" aria-live="polite">
+            <span id="wiki-session-label">Comprobando acceso…</span>
+            <button type="button" id="wiki-auth-button" hidden>Iniciar sesión</button>
+          </div>
+        </aside>
+
+        <section class="wiki-workspace" aria-live="polite" aria-busy="true">
+          <div class="wiki-toolbar" id="wiki-toolbar" hidden>
+            <div class="wiki-breadcrumb" id="wiki-breadcrumb"></div>
+            <div class="wiki-actions">
+              <button type="button" id="wiki-history-button">Historial</button>
+              <button type="button" class="wiki-primary-action" id="wiki-edit-button" hidden>Editar</button>
+            </div>
+          </div>
+          <div class="wiki-notice" id="wiki-notice" hidden role="status"></div>
+          <div id="wiki-content">
+            <div class="wiki-loading" aria-label="Cargando contenido">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="wiki-context" id="wiki-context" aria-label="Contenido relacionado" hidden></aside>
+      </div>
+    </main>
+
+    <footer class="wiki-footer">
+      <div><a href="/">ChurrOS</a><span>Documentación abierta, impulsada por MediaWiki.</span></div>
+      <a href="https://github.com/Hoyuse/ChurrOS/">Código en GitHub</a>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script type="module" src="js/wiki.js"></script>
+  </body>
+</html>
